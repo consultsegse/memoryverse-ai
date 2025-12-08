@@ -1,0 +1,21 @@
+# COPIE E COLE ESTAS VARIÁVEIS NO TAB "ENVIRONMENT" DO EASYPANEL
+
+# --- Banco de Dados (Link Interno) ---
+DATABASE_URL=postgres://memoryverseai:58539c7e2dc5030a0252@memoryverseai_memoryverseai:5432/memoryverseai?sslmode=disable
+
+# --- Servidor ---
+NODE_ENV=production
+PORT=3000
+
+# --- URLs ---
+# Sua URL final (configure o domínio no Easypanel)
+VITE_APP_URL=https://memoryverse.com.br
+
+# --- Segurança (CRÍTICO: Mude isto!) ---
+JWT_SECRET=4a8f9c2e1d5b7a3c9e8f1d2b4a5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1
+
+# --- Integração N8N (Opcional) ---
+# N8N_WEBHOOK_URL=...
+
+# --- APIs de IA (Opcional agora, configure depois) ---
+# OPENAI_API_KEY=sk-...

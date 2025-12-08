@@ -103,7 +103,7 @@ nano .env
 
 ```env
 # Database
-DATABASE_URL=mysql://usuario:senha@localhost:3306/nome_do_banco
+DATABASE_URL=postgres://memoryverseai:58539c7e2dc5030a0252@memoryverseai_memoryverseai:5432/memoryverseai?sslmode=disable
 
 # JWT Secret (gere uma string aleatória segura)
 JWT_SECRET=sua_chave_secreta_muito_longa_e_aleatoria
