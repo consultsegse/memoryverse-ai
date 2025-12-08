@@ -53,6 +53,20 @@ async function startServer() {
   // OAuth callback under /api/oauth/callback
   // OAuth routes removed
   // registerOAuthRoutes(app);
+  // Run migrations
+  try {
+    const { getDb } = await import("../db");
+    const db = await getDb();
+    if (db) {
+      console.log("Running DB migrations...");
+      const { migrate } = await import("drizzle-orm/node-postgres/migrator");
+      await migrate(db, { migrationsFolder: path.join(process.cwd(), "drizzle") });
+      console.log("Migrations completed successfully.");
+    }
+  } catch (err) {
+    console.error("Migration failed:", err);
+  }
+
   // tRPC API
   app.use(
     "/api/trpc",
