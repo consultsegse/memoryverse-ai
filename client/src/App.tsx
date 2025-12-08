@@ -14,6 +14,9 @@ import { AffiliateDashboard } from "./pages/AffiliateDashboard";
 import { Referral } from "./pages/Referral";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import Settings from "./pages/Settings";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
 import MemoryDetail from "./pages/MemoryDetail";
 import AdminModeration from "./pages/Admin";
 import Feedback from "./pages/Feedback";
@@ -28,6 +31,9 @@ function Router() {
       <Route path="/my-memories" component={MyMemories} />
       <Route path="/admin/moderation" component={AdminModeration} />
       <Route path="/feedback" component={Feedback} />
+      <Route path="/settings" component={Settings} />
+      <Route path="/privacy" component={Privacy} />
+      <Route path="/terms" component={Terms} />
       <Route path="/notifications-demo" component={NotificationDemo} />
       <Route path="/contact" component={Contact} />
       <Route path="/pricing" component={Pricing} />

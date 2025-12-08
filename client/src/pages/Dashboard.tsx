@@ -50,12 +50,12 @@ export default function Dashboard() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!story.trim()) {
       toast.error("Por favor, conte sua história");
       return;
     }
-    
+
     if (selectedFormats.length === 0) {
       toast.error("Selecione pelo menos um formato");
       return;
@@ -81,7 +81,7 @@ export default function Dashboard() {
               </span>
             </div>
           </Link>
-          
+
           <div className="flex items-center gap-4">
             {/* <LanguageSelector /> */}
             {/* <NotificationCenter /> */}
@@ -89,6 +89,11 @@ export default function Dashboard() {
               <Button variant="outline">
                 <Grid3x3 className="h-4 w-4 mr-2" />
                 Minhas Memórias
+              </Button>
+            </Link>
+            <Link href="/settings">
+              <Button variant="ghost">
+                Configurações
               </Button>
             </Link>
             <Button variant="ghost" onClick={() => logout()}>
@@ -146,7 +151,7 @@ export default function Dashboard() {
                   {formats.map((format) => {
                     const Icon = format.icon;
                     const isSelected = selectedFormats.includes(format.id as "video" | "music" | "book" | "podcast");
-                    
+
                     return (
                       <label
                         key={format.id}
@@ -215,7 +220,7 @@ export default function Dashboard() {
               </p>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">🎨 Profissional</CardTitle>
@@ -226,7 +231,7 @@ export default function Dashboard() {
               </p>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">💾 Suas Memórias</CardTitle>

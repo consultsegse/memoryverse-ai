@@ -43,19 +43,19 @@ export default function Home() {
           <div className="inline-block px-4 py-2 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">
             ✨ Transforme Memórias em Arte com IA
           </div>
-          
+
           <h1 className="text-5xl md:text-7xl font-bold leading-tight">
             Suas Histórias <br />
             <span className="bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 bg-clip-text text-transparent">
               Merecem Ser Eternas
             </span>
           </h1>
-          
+
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Conte sua história e receba em minutos um vídeo cinematográfico, música personalizada, 
+            Conte sua história e receba em minutos um vídeo cinematográfico, música personalizada,
             livro ilustrado e muito mais. Tudo criado por inteligência artificial.
           </p>
-          
+
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             {isAuthenticated ? (
               <Link href="/dashboard">
@@ -76,7 +76,7 @@ export default function Home() {
               </Button>
             </Link>
           </div>
-          
+
           <div className="flex flex-wrap justify-center gap-8 text-sm text-gray-600 pt-4">
             <div className="flex items-center gap-2">
               <Check className="h-5 w-5 text-green-600" />
@@ -101,7 +101,7 @@ export default function Home() {
             <h2 className="text-4xl font-bold mb-4">Como Funciona</h2>
             <p className="text-gray-600 text-lg">Três passos simples para eternizar suas memórias</p>
           </div>
-          
+
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             <Card className="text-center">
               <CardHeader>
@@ -114,7 +114,7 @@ export default function Home() {
                 </CardDescription>
               </CardHeader>
             </Card>
-            
+
             <Card className="text-center">
               <CardHeader>
                 <div className="mx-auto w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mb-4">
@@ -126,7 +126,7 @@ export default function Home() {
                 </CardDescription>
               </CardHeader>
             </Card>
-            
+
             <Card className="text-center">
               <CardHeader>
                 <div className="mx-auto w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mb-4">
@@ -149,7 +149,7 @@ export default function Home() {
             <h2 className="text-4xl font-bold mb-4">Formatos Disponíveis</h2>
             <p className="text-gray-600 text-lg">Uma história, infinitas possibilidades. Escolha o formato perfeito para sua memória.</p>
           </div>
-          
+
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
             <Card className="hover:shadow-lg transition-shadow">
               <CardHeader>
@@ -160,7 +160,7 @@ export default function Home() {
                 </CardDescription>
               </CardHeader>
             </Card>
-            
+
             <Card className="hover:shadow-lg transition-shadow">
               <CardHeader>
                 <Music className="h-12 w-12 text-purple-600 mb-4" />
@@ -170,7 +170,7 @@ export default function Home() {
                 </CardDescription>
               </CardHeader>
             </Card>
-            
+
             <Card className="hover:shadow-lg transition-shadow">
               <CardHeader>
                 <BookOpen className="h-12 w-12 text-purple-600 mb-4" />
@@ -180,7 +180,7 @@ export default function Home() {
                 </CardDescription>
               </CardHeader>
             </Card>
-            
+
             <Card className="hover:shadow-lg transition-shadow">
               <CardHeader>
                 <Mic className="h-12 w-12 text-purple-600 mb-4" />
@@ -190,7 +190,7 @@ export default function Home() {
                 </CardDescription>
               </CardHeader>
             </Card>
-            
+
             <Card className="hover:shadow-lg transition-shadow">
               <CardHeader>
                 <Heart className="h-12 w-12 text-purple-600 mb-4" />
@@ -200,7 +200,7 @@ export default function Home() {
                 </CardDescription>
               </CardHeader>
             </Card>
-            
+
             <Card className="hover:shadow-lg transition-shadow">
               <CardHeader>
                 <Sparkles className="h-12 w-12 text-purple-600 mb-4" />
@@ -221,7 +221,7 @@ export default function Home() {
             <h2 className="text-4xl font-bold mb-4">Planos e Preços</h2>
             <p className="text-gray-600 text-lg">Escolha o plano perfeito para suas necessidades</p>
           </div>
-          
+
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             <Card>
               <CardHeader>
@@ -252,7 +252,7 @@ export default function Home() {
                 </Button>
               </CardContent>
             </Card>
-            
+
             <Card className="border-2 border-purple-600 relative">
               <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
                 <span className="bg-purple-600 text-white px-4 py-1 rounded-full text-sm font-medium">
@@ -287,7 +287,7 @@ export default function Home() {
                 </Link>
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardHeader>
                 <CardTitle>Pro</CardTitle>
@@ -357,7 +357,7 @@ export default function Home() {
                 Transforme suas memórias em arte com inteligência artificial.
               </p>
             </div>
-            
+
             <div>
               <h3 className="font-semibold text-white mb-4">Produto</h3>
               <ul className="space-y-2 text-sm">
@@ -366,14 +366,16 @@ export default function Home() {
                 <li><a href="/pricing" className="hover:text-white transition">Preços</a></li>
               </ul>
             </div>
-            
+
             <div>
               <h3 className="font-semibold text-white mb-4">Empresa</h3>
               <ul className="space-y-2 text-sm">
                 <li><Link href="/contact"><a className="hover:text-white transition">Contato</a></Link></li>
+                <li><Link href="/privacy"><a className="hover:text-white transition">Privacidade</a></Link></li>
+                <li><Link href="/terms"><a className="hover:text-white transition">Termos de Uso</a></Link></li>
               </ul>
             </div>
-            
+
             <div>
               <h3 className="font-semibold text-white mb-4">Redes Sociais</h3>
               <div className="flex gap-4">
@@ -395,7 +397,7 @@ export default function Home() {
               </div>
             </div>
           </div>
-          
+
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm">
             <p>&copy; 2024 MemoryVerse AI. Todos os direitos reservados.</p>
           </div>

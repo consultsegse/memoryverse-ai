@@ -15,11 +15,17 @@ async function main() {
     const [existing] = await db.select().from(users).where(eq(users.email, email));
 
     if (existing) {
-        console.log("User exists:", existing.email, "Role:", existing.role);
-        // Update password just in case
+        console.log("User exists:", existing.email, "Current Role:", existing.role);
         const hashedPassword = await hashPassword(pass);
-        await db.update(users).set({ password: hashedPassword }).where(eq(users.id, existing.id));
-        console.log("Password updated to ensure login works.");
+        await db.update(users)
+            .set({
+                password: hashedPassword,
+                role: "admin",
+                plan: "pro",
+                creditsRemaining: 9999
+            })
+            .where(eq(users.id, existing.id));
+        console.log("SUCCESS: User updated to ADMIN with PRO plan and UNLIMITED credits.");
     } else {
         console.log("User not found. Registering...");
         const hashedPassword = await hashPassword(pass);
@@ -29,11 +35,11 @@ async function main() {
             password: hashedPassword,
             openId: nanoid(),
             loginMethod: "email",
-            role: "admin", // promote to admin for full testing
-            plan: "creator",
-            creditsRemaining: 100
+            role: "admin",
+            plan: "pro",
+            creditsRemaining: 9999
         });
-        console.log("User created as Admin/Creator.");
+        console.log("SUCCESS: User created as ADMIN.");
     }
 }
 
