@@ -18,7 +18,7 @@ function generateAffiliateCode(name: string): string {
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-z0-9]/g, "")
     .substring(0, 10);
-  
+
   const random = Math.random().toString(36).substring(2, 8);
   return `${slug}-${random}`.toUpperCase();
 }
@@ -29,29 +29,29 @@ function generateAffiliateCode(name: string): string {
 export async function createAffiliate(userId: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  
+
   // Verificar se já é afiliado
   const [existing] = await db.select().from(affiliates).where(eq(affiliates.userId, userId));
   if (existing) {
     return existing;
   }
-  
+
   // Buscar nome do usuário
   const [user] = await db.select().from(users).where(eq(users.id, userId));
   if (!user) throw new Error("User not found");
-  
+
   // Gerar código único
   let code = generateAffiliateCode(user.name || "user");
   let attempts = 0;
-  
+
   while (attempts < 10) {
     const [existingCode] = await db.select().from(affiliates).where(eq(affiliates.code, code));
     if (!existingCode) break;
-    
+
     code = generateAffiliateCode(user.name || "user");
     attempts++;
   }
-  
+
   // Criar afiliado
   const [affiliate] = await db.insert(affiliates).values({
     userId,
@@ -60,8 +60,8 @@ export async function createAffiliate(userId: number) {
     tier: "standard",
     commissionRate: 30,
     recurringCommissionRate: 10,
-  });
-  
+  }).returning();
+
   return affiliate;
 }
 
@@ -71,42 +71,42 @@ export async function createAffiliate(userId: number) {
 export async function trackAffiliateReferral(affiliateCode: string, referredUserId: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  
+
   // Buscar afiliado pelo código
   const [affiliate] = await db.select().from(affiliates).where(eq(affiliates.code, affiliateCode));
   if (!affiliate) {
     throw new Error("Affiliate not found");
   }
-  
+
   if (affiliate.status !== "active") {
     throw new Error("Affiliate is not active");
   }
-  
+
   // Verificar se usuário já foi referenciado
   const [existing] = await db
     .select()
     .from(affiliateReferrals)
     .where(eq(affiliateReferrals.referredUserId, referredUserId));
-  
+
   if (existing) {
     return existing; // Já foi referenciado
   }
-  
+
   // Criar referência
   const [referral] = await db.insert(affiliateReferrals).values({
     affiliateId: affiliate.id,
     referredUserId,
     status: "pending",
-  });
-  
+  }).returning();
+
   // Atualizar contador de referências
   await db
     .update(affiliates)
-    .set({ 
+    .set({
       totalReferrals: sql`${affiliates.totalReferrals} + 1`,
     })
     .where(eq(affiliates.id, affiliate.id));
-  
+
   return referral;
 }
 
@@ -120,30 +120,30 @@ export async function processFirstSaleCommission(
 ) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  
+
   // Buscar referência
   const [referral] = await db
     .select()
     .from(affiliateReferrals)
     .where(eq(affiliateReferrals.referredUserId, referredUserId));
-  
+
   if (!referral) {
     return null; // Não foi referenciado por afiliado
   }
-  
+
   // Buscar afiliado
   const [affiliate] = await db
     .select()
     .from(affiliates)
     .where(eq(affiliates.id, referral.affiliateId));
-  
+
   if (!affiliate || affiliate.status !== "active") {
     return null;
   }
-  
+
   // Calcular comissão
   const commissionAmount = Math.floor((amount * affiliate.commissionRate) / 100);
-  
+
   // Criar comissão
   await db.insert(affiliateCommissions).values({
     affiliateId: affiliate.id,
@@ -153,7 +153,7 @@ export async function processFirstSaleCommission(
     amount: commissionAmount,
     status: "pending",
   });
-  
+
   // Atualizar referência
   await db
     .update(affiliateReferrals)
@@ -165,7 +165,7 @@ export async function processFirstSaleCommission(
       totalCommission: sql`${affiliateReferrals.totalCommission} + ${commissionAmount}`,
     })
     .where(eq(affiliateReferrals.id, referral.id));
-  
+
   // Atualizar afiliado
   await db
     .update(affiliates)
@@ -175,7 +175,7 @@ export async function processFirstSaleCommission(
       pendingEarnings: sql`${affiliates.pendingEarnings} + ${commissionAmount}`,
     })
     .where(eq(affiliates.id, affiliate.id));
-  
+
   return { commissionAmount, affiliate };
 }
 
@@ -189,7 +189,7 @@ export async function processRecurringCommission(
 ) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  
+
   // Buscar referência
   const [referral] = await db
     .select()
@@ -200,24 +200,24 @@ export async function processRecurringCommission(
         eq(affiliateReferrals.status, "converted")
       )
     );
-  
+
   if (!referral) {
     return null;
   }
-  
+
   // Buscar afiliado
   const [affiliate] = await db
     .select()
     .from(affiliates)
     .where(eq(affiliates.id, referral.affiliateId));
-  
+
   if (!affiliate || affiliate.status !== "active") {
     return null;
   }
-  
+
   // Calcular comissão recorrente
   const commissionAmount = Math.floor((amount * affiliate.recurringCommissionRate) / 100);
-  
+
   // Criar comissão
   await db.insert(affiliateCommissions).values({
     affiliateId: affiliate.id,
@@ -227,7 +227,7 @@ export async function processRecurringCommission(
     amount: commissionAmount,
     status: "pending",
   });
-  
+
   // Atualizar referência
   await db
     .update(affiliateReferrals)
@@ -237,7 +237,7 @@ export async function processRecurringCommission(
       totalCommission: sql`${affiliateReferrals.totalCommission} + ${commissionAmount}`,
     })
     .where(eq(affiliateReferrals.id, referral.id));
-  
+
   // Atualizar afiliado
   await db
     .update(affiliates)
@@ -246,7 +246,7 @@ export async function processRecurringCommission(
       pendingEarnings: sql`${affiliates.pendingEarnings} + ${commissionAmount}`,
     })
     .where(eq(affiliates.id, affiliate.id));
-  
+
   return { commissionAmount, affiliate };
 }
 
@@ -256,7 +256,7 @@ export async function processRecurringCommission(
 export async function approveCommission(commissionId: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  
+
   await db
     .update(affiliateCommissions)
     .set({ status: "approved" })
@@ -269,7 +269,7 @@ export async function approveCommission(commissionId: number) {
 export async function payoutCommissions(affiliateId: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  
+
   // Buscar comissões aprovadas
   const approvedCommissions = await db
     .select()
@@ -280,35 +280,35 @@ export async function payoutCommissions(affiliateId: number) {
         eq(affiliateCommissions.status, "approved")
       )
     );
-  
+
   if (approvedCommissions.length === 0) {
     throw new Error("No approved commissions to pay");
   }
-  
+
   const totalAmount = approvedCommissions.reduce((sum, c) => sum + c.amount, 0);
-  
+
   // TODO: Integrar com sistema de pagamento PIX
   // Por enquanto, apenas marcar como pago
-  
+
   const commissionIds = approvedCommissions.map(c => c.id);
-  
+
   // Marcar comissões como pagas
   for (const id of commissionIds) {
     await db
       .update(affiliateCommissions)
-      .set({ 
+      .set({
         status: "paid",
         paidAt: new Date(),
       })
       .where(eq(affiliateCommissions.id, id));
   }
-  
+
   // Atualizar afiliado
   const [affiliate] = await db
     .select()
     .from(affiliates)
     .where(eq(affiliates.id, affiliateId));
-  
+
   if (affiliate) {
     await db
       .update(affiliates)
@@ -319,7 +319,7 @@ export async function payoutCommissions(affiliateId: number) {
       })
       .where(eq(affiliates.id, affiliateId));
   }
-  
+
   return { totalAmount, commissionCount: commissionIds.length };
 }
 
@@ -329,52 +329,52 @@ export async function payoutCommissions(affiliateId: number) {
 export async function getAffiliateStats(userId: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  
+
   const [affiliate] = await db
     .select()
     .from(affiliates)
     .where(eq(affiliates.userId, userId));
-  
+
   if (!affiliate) {
     return null;
   }
-  
+
   // Buscar referências
   const referralsData = await db
     .select()
     .from(affiliateReferrals)
     .where(eq(affiliateReferrals.affiliateId, affiliate.id));
-  
+
   // Buscar comissões
   const commissionsData = await db
     .select()
     .from(affiliateCommissions)
     .where(eq(affiliateCommissions.affiliateId, affiliate.id));
-  
+
   // Calcular métricas
   const pendingReferrals = referralsData.filter(r => r.status === "pending").length;
   const convertedReferrals = referralsData.filter(r => r.status === "converted").length;
-  
+
   const pendingCommissions = commissionsData
     .filter(c => c.status === "pending")
     .reduce((sum, c) => sum + c.amount, 0);
-  
+
   const approvedCommissions = commissionsData
     .filter(c => c.status === "approved")
     .reduce((sum, c) => sum + c.amount, 0);
-  
+
   const paidCommissions = commissionsData
     .filter(c => c.status === "paid")
     .reduce((sum, c) => sum + c.amount, 0);
-  
+
   return {
     affiliate,
     stats: {
       totalReferrals: referralsData.length,
       pendingReferrals,
       convertedReferrals,
-      conversionRate: referralsData.length > 0 
-        ? Math.round((convertedReferrals / referralsData.length) * 100) 
+      conversionRate: referralsData.length > 0
+        ? Math.round((convertedReferrals / referralsData.length) * 100)
         : 0,
       totalEarnings: affiliate.totalEarnings,
       pendingEarnings: pendingCommissions,
@@ -393,18 +393,18 @@ export async function getAffiliateStats(userId: number) {
 export async function updateAffiliateTier(affiliateId: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  
+
   const [affiliate] = await db
     .select()
     .from(affiliates)
     .where(eq(affiliates.id, affiliateId));
-  
+
   if (!affiliate) return;
-  
+
   // Lógica de tier baseada em referências ativas
   let newTier: "standard" | "silver" | "gold" | "platinum" = "standard";
   let newRecurringRate = 10;
-  
+
   if (affiliate.activeReferrals >= 100) {
     newTier = "platinum";
     newRecurringRate = 20;
@@ -415,18 +415,18 @@ export async function updateAffiliateTier(affiliateId: number) {
     newTier = "silver";
     newRecurringRate = 12;
   }
-  
+
   if (newTier !== affiliate.tier) {
     await db
       .update(affiliates)
-      .set({ 
+      .set({
         tier: newTier,
         recurringCommissionRate: newRecurringRate,
       })
       .where(eq(affiliates.id, affiliateId));
-    
+
     return { upgraded: true, newTier, newRecurringRate };
   }
-  
+
   return { upgraded: false };
 }

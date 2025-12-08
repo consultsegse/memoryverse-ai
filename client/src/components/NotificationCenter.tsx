@@ -19,15 +19,15 @@ export function NotificationCenter() {
   const [priorityFilter, setPriorityFilter] = useState<PriorityFilter>("all");
   const { data: notifications = [] } = trpc.notifications.list.useQuery();
   const { data: unreadCount = 0 } = trpc.notifications.unreadCount.useQuery();
-  
+
   const markAsReadMutation = trpc.notifications.markAsReadWithTimestamp.useMutation();
-  
+
   const markAllAsReadMutation = trpc.notifications.markAllAsRead.useMutation({
     onSuccess: () => {
       toast.success("Todas as notificações marcadas como lidas");
     },
   });
-  
+
   const deleteMutation = trpc.notifications.delete.useMutation({
     onSuccess: () => {
       toast.success("Notificação excluída");
@@ -35,8 +35,8 @@ export function NotificationCenter() {
   });
 
   // Filter notifications by priority
-  const filteredNotifications = priorityFilter === "all" 
-    ? notifications 
+  const filteredNotifications = priorityFilter === "all"
+    ? notifications
     : notifications.filter(n => n.priority === priorityFilter);
 
   // Separate unread and read notifications
@@ -101,7 +101,7 @@ export function NotificationCenter() {
             </div>
           </div>
         </div>
-        
+
         {/* Notifications List */}
         <Tabs defaultValue="unread" className="w-full">
           <TabsList className="w-full grid grid-cols-2 rounded-none">
@@ -132,7 +132,7 @@ export function NotificationCenter() {
                       imageUrl={notification.imageUrl}
                       actionUrl={notification.actionUrl}
                       actionLabel={notification.actionLabel}
-                      priority={notification.priority}
+                      priority={notification.priority as any}
                       isRead={notification.isRead}
                       createdAt={notification.createdAt}
                       onMarkAsRead={(id) => markAsReadMutation.mutate({ notificationId: id })}
@@ -163,7 +163,7 @@ export function NotificationCenter() {
                       imageUrl={notification.imageUrl}
                       actionUrl={notification.actionUrl}
                       actionLabel={notification.actionLabel}
-                      priority={notification.priority}
+                      priority={notification.priority as any}
                       isRead={notification.isRead}
                       createdAt={notification.createdAt}
                       onMarkAsRead={(id) => markAsReadMutation.mutate({ notificationId: id })}

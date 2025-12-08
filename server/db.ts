@@ -71,7 +71,8 @@ export async function upsertUser(user: InsertUser): Promise<void> {
       updateSet.lastSignedIn = new Date();
     }
 
-    await db.insert(users).values(values).onDuplicateKeyUpdate({
+    await db.insert(users).values(values).onConflictDoUpdate({
+      target: users.openId,
       set: updateSet,
     });
   } catch (error) {
@@ -181,7 +182,10 @@ export async function upsertNotificationPreferences(userId: number, prefs: Parti
 
   await db.insert(notificationPreferences)
     .values(values as InsertNotificationPreference)
-    .onDuplicateKeyUpdate({ set: prefs });
+    .onConflictDoUpdate({
+      target: notificationPreferences.userId,
+      set: prefs
+    });
 }
 
 // Advanced notification helpers
