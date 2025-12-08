@@ -102,7 +102,7 @@ async function startServer() {
         const db = await getDb();
         if (db) {
           // Dangerous: Wipes the entire database to fix the broken state
-          await db.execute(sql`DROP SCHEMA public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO postgres; GRANT ALL ON SCHEMA public TO public;`);
+          await db.execute(sql`DROP SCHEMA public CASCADE; CREATE SCHEMA public;`);
           console.log("[Startup] ✅ Database wiped successfully.");
 
           console.log("[Startup] Retrying migration request...");
