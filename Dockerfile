@@ -40,4 +40,4 @@ USER nodejs
 
 EXPOSE 3000
 
-CMD ["npm", "run", "start"]
+CMD ["sh", "-c", "npm run db:prod && npm run start"]
