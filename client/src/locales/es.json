@@ -1,0 +1,141 @@
+{
+  "common": {
+    "appName": "MemoryVerse AI",
+    "tagline": "Transforma Memorias en Arte con IA",
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "close": "Cerrar",
+    "back": "Volver",
+    "next": "Siguiente",
+    "logout": "Salir"
+  },
+  "nav": {
+    "howItWorks": "Cómo Funciona",
+    "formats": "Formatos",
+    "pricing": "Precios",
+    "dashboard": "Panel",
+    "myMemories": "Mis Memorias",
+    "newMemory": "Nueva Memoria"
+  },
+  "home": {
+    "hero": {
+      "title": "Tus Historias",
+      "titleHighlight": "Merecen Ser Eternas",
+      "description": "Cuenta tu historia y recibe en minutos un video cinematográfico, canción personalizada, libro ilustrado y mucho más. Todo creado por inteligencia artificial.",
+      "cta": "Crear Mi Primera Memoria",
+      "viewExamples": "Ver Ejemplos",
+      "benefit1": "3 memorias gratis",
+      "benefit2": "Sin tarjeta de crédito",
+      "benefit3": "Listo en 5 minutos"
+    },
+    "howItWorks": {
+      "title": "Cómo Funciona",
+      "step1Title": "Cuenta Tu Historia",
+      "step1Desc": "Escribe o graba tu memoria. Puede ser cualquier momento especial de tu vida.",
+      "step2Title": "Elige los Formatos",
+      "step2Desc": "Selecciona cómo quieres recibirlo: video, música, libro, podcast o ¡todos!",
+      "step3Title": "Recibe en Minutos",
+      "step3Desc": "Nuestra IA crea contenido profesional y emocional en 5-10 minutos."
+    },
+    "formats": {
+      "title": "Formatos Disponibles",
+      "video": "Video Cinematográfico",
+      "videoDesc": "Video emocional de 1-3 minutos con banda sonora",
+      "music": "Canción Personalizada",
+      "musicDesc": "Canción original sobre tu historia",
+      "book": "Libro Ilustrado",
+      "bookDesc": "Libro digital con ilustraciones profesionales",
+      "podcast": "Podcast Narrativo",
+      "podcastDesc": "Audio narrado con voz profesional"
+    },
+    "pricing": {
+      "title": "Planes y Precios",
+      "free": "Gratis",
+      "freeDesc": "Prueba sin compromiso",
+      "freeFeature1": "3 memorias gratis",
+      "freeFeature2": "Todos los formatos",
+      "freeFeature3": "Calidad HD",
+      "creator": "Creator",
+      "creatorDesc": "Para creadores de contenido",
+      "creatorFeature1": "20 memorias/mes",
+      "creatorFeature2": "Sin marca de agua",
+      "creatorFeature3": "Soporte prioritario",
+      "pro": "Pro",
+      "proDesc": "Para uso profesional",
+      "proFeature1": "Memorias ilimitadas",
+      "proFeature2": "Acceso API",
+      "proFeature3": "Uso comercial",
+      "month": "/mes",
+      "startFree": "Comenzar Gratis",
+      "upgrade": "Mejorar Plan"
+    }
+  },
+  "dashboard": {
+    "welcome": "¡Hola, {{name}}!",
+    "subtitle": "Cuenta una historia y transfórmala en arte con inteligencia artificial",
+    "createTitle": "Crear Nueva Memoria",
+    "createDesc": "Comparte una historia personal, memoria especial o momento memorable",
+    "storyLabel": "Tu Historia",
+    "storyPlaceholder": "Érase una vez... cuenta tu historia aquí. ¡Cuantos más detalles, mejor será el resultado!",
+    "charactersCount": "{{count}} caracteres • Mínimo recomendado: 100 caracteres",
+    "selectFormats": "Selecciona los Formatos",
+    "creating": "Creando Tu Memoria...",
+    "createMemory": "Crear Memoria",
+    "fast": "Rápido",
+    "fastDesc": "Tus memorias están listas en 5-10 minutos",
+    "professional": "Profesional",
+    "professionalDesc": "Calidad cinematográfica creada por IA",
+    "yourMemories": "Tus Memorias",
+    "yourMemoriesDesc": "Accede y descarga tus creaciones en cualquier momento"
+  },
+  "memories": {
+    "title": "Mis",
+    "titleHighlight": "Memorias",
+    "count": "{{count}} memoria creada",
+    "count_plural": "{{count}} memorias creadas",
+    "empty": "Aún no hay memorias",
+    "emptyDesc": "¡Comienza creando tu primera memoria y transforma tus historias en arte!",
+    "createFirst": "Crear Primera Memoria",
+    "status": {
+      "processing": "Procesando",
+      "completed": "Completada",
+      "failed": "Falló"
+    },
+    "createdAgo": "Creada {{time}}",
+    "view": "Ver",
+    "download": "Descargar",
+    "processing": "Procesando...",
+    "tryAgain": "Intentar de Nuevo"
+  },
+  "formats": {
+    "video": "Video Cinematográfico",
+    "videoDesc": "Video emocional de 1-3 minutos",
+    "music": "Canción Personalizada",
+    "musicDesc": "Canción sobre tu historia",
+    "book": "Libro Ilustrado",
+    "bookDesc": "Libro digital profesional",
+    "podcast": "Podcast Narrativo",
+    "podcastDesc": "Audio narrado profesionalmente"
+  },
+  "notifications": {
+    "title": "Notificaciones",
+    "empty": "No hay notificaciones",
+    "markAsRead": "Marcar como leída",
+    "delete": "Eliminar",
+    "unread": "{{count}} sin leer",
+    "unread_plural": "{{count}} sin leer"
+  },
+  "errors": {
+    "storyRequired": "Por favor, cuenta tu historia",
+    "formatRequired": "Selecciona al menos un formato",
+    "createError": "Error al crear memoria: {{message}}"
+  },
+  "success": {
+    "memoryCreated": "¡Memoria creada! Te notificaremos cuando esté lista."
+  }
+}

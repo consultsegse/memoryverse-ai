@@ -1,0 +1,141 @@
+{
+  "common": {
+    "appName": "MemoryVerse AI",
+    "tagline": "Transform Memories into Art with AI",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "logout": "Logout"
+  },
+  "nav": {
+    "howItWorks": "How It Works",
+    "formats": "Formats",
+    "pricing": "Pricing",
+    "dashboard": "Dashboard",
+    "myMemories": "My Memories",
+    "newMemory": "New Memory"
+  },
+  "home": {
+    "hero": {
+      "title": "Your Stories",
+      "titleHighlight": "Deserve to Be Eternal",
+      "description": "Tell your story and receive in minutes a cinematic video, personalized song, illustrated book and much more. All created by artificial intelligence.",
+      "cta": "Create My First Memory",
+      "viewExamples": "View Examples",
+      "benefit1": "3 free memories",
+      "benefit2": "No credit card",
+      "benefit3": "Ready in 5 minutes"
+    },
+    "howItWorks": {
+      "title": "How It Works",
+      "step1Title": "Tell Your Story",
+      "step1Desc": "Write or record your memory. It can be any special moment from your life.",
+      "step2Title": "Choose Formats",
+      "step2Desc": "Select how you want to receive: video, music, book, podcast or all!",
+      "step3Title": "Receive in Minutes",
+      "step3Desc": "Our AI creates professional and emotional content in 5-10 minutes."
+    },
+    "formats": {
+      "title": "Available Formats",
+      "video": "Cinematic Video",
+      "videoDesc": "Emotional 1-3 minute video with soundtrack",
+      "music": "Personalized Song",
+      "musicDesc": "Original song about your story",
+      "book": "Illustrated Book",
+      "bookDesc": "Digital book with professional illustrations",
+      "podcast": "Narrative Podcast",
+      "podcastDesc": "Audio narrated with professional voice"
+    },
+    "pricing": {
+      "title": "Plans & Pricing",
+      "free": "Free",
+      "freeDesc": "Try without commitment",
+      "freeFeature1": "3 free memories",
+      "freeFeature2": "All formats",
+      "freeFeature3": "HD quality",
+      "creator": "Creator",
+      "creatorDesc": "For content creators",
+      "creatorFeature1": "20 memories/month",
+      "creatorFeature2": "No watermark",
+      "creatorFeature3": "Priority support",
+      "pro": "Pro",
+      "proDesc": "For professional use",
+      "proFeature1": "Unlimited memories",
+      "proFeature2": "API access",
+      "proFeature3": "Commercial use",
+      "month": "/month",
+      "startFree": "Start Free",
+      "upgrade": "Upgrade"
+    }
+  },
+  "dashboard": {
+    "welcome": "Hello, {{name}}!",
+    "subtitle": "Tell a story and transform it into art with artificial intelligence",
+    "createTitle": "Create New Memory",
+    "createDesc": "Share a personal story, special memory or remarkable moment",
+    "storyLabel": "Your Story",
+    "storyPlaceholder": "Once upon a time... tell your story here. The more details, the better the result!",
+    "charactersCount": "{{count}} characters • Recommended minimum: 100 characters",
+    "selectFormats": "Select Formats",
+    "creating": "Creating Your Memory...",
+    "createMemory": "Create Memory",
+    "fast": "Fast",
+    "fastDesc": "Your memories are ready in 5-10 minutes",
+    "professional": "Professional",
+    "professionalDesc": "Cinematic quality created by AI",
+    "yourMemories": "Your Memories",
+    "yourMemoriesDesc": "Access and download your creations anytime"
+  },
+  "memories": {
+    "title": "My",
+    "titleHighlight": "Memories",
+    "count": "{{count}} memory created",
+    "count_plural": "{{count}} memories created",
+    "empty": "No memories yet",
+    "emptyDesc": "Start by creating your first memory and transform your stories into art!",
+    "createFirst": "Create First Memory",
+    "status": {
+      "processing": "Processing",
+      "completed": "Completed",
+      "failed": "Failed"
+    },
+    "createdAgo": "Created {{time}}",
+    "view": "View",
+    "download": "Download",
+    "processing": "Processing...",
+    "tryAgain": "Try Again"
+  },
+  "formats": {
+    "video": "Cinematic Video",
+    "videoDesc": "Emotional 1-3 minute video",
+    "music": "Personalized Song",
+    "musicDesc": "Song about your story",
+    "book": "Illustrated Book",
+    "bookDesc": "Professional digital book",
+    "podcast": "Narrative Podcast",
+    "podcastDesc": "Professionally narrated audio"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "No notifications",
+    "markAsRead": "Mark as read",
+    "delete": "Delete",
+    "unread": "{{count}} unread",
+    "unread_plural": "{{count}} unread"
+  },
+  "errors": {
+    "storyRequired": "Please tell your story",
+    "formatRequired": "Select at least one format",
+    "createError": "Error creating memory: {{message}}"
+  },
+  "success": {
+    "memoryCreated": "Memory created! You'll be notified when it's ready."
+  }
+}

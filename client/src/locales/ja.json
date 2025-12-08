@@ -1,0 +1,141 @@
+{
+  "common": {
+    "appName": "MemoryVerse AI",
+    "tagline": "AIで思い出をアートに変換",
+    "loading": "読み込み中...",
+    "error": "エラー",
+    "success": "成功",
+    "cancel": "キャンセル",
+    "save": "保存",
+    "delete": "削除",
+    "edit": "編集",
+    "close": "閉じる",
+    "back": "戻る",
+    "next": "次へ",
+    "logout": "ログアウト"
+  },
+  "nav": {
+    "howItWorks": "使い方",
+    "formats": "フォーマット",
+    "pricing": "料金",
+    "dashboard": "ダッシュボード",
+    "myMemories": "マイメモリー",
+    "newMemory": "新しいメモリー"
+  },
+  "home": {
+    "hero": {
+      "title": "あなたのストーリーは",
+      "titleHighlight": "永遠に残す価値がある",
+      "description": "あなたのストーリーを語ると、数分で映画のようなビデオ、パーソナライズされた曲、イラスト入りの本などが届きます。すべて人工知能によって作成されます。",
+      "cta": "最初のメモリーを作成",
+      "viewExamples": "例を見る",
+      "benefit1": "3つの無料メモリー",
+      "benefit2": "クレジットカード不要",
+      "benefit3": "5分で完成"
+    },
+    "howItWorks": {
+      "title": "使い方",
+      "step1Title": "ストーリーを語る",
+      "step1Desc": "あなたの思い出を書くか録音してください。人生の特別な瞬間なら何でも構いません。",
+      "step2Title": "フォーマットを選択",
+      "step2Desc": "受け取り方を選択:ビデオ、音楽、本、ポッドキャスト、またはすべて!",
+      "step3Title": "数分で受け取る",
+      "step3Desc": "私たちのAIは5〜10分でプロフェッショナルで感動的なコンテンツを作成します。"
+    },
+    "formats": {
+      "title": "利用可能なフォーマット",
+      "video": "映画のようなビデオ",
+      "videoDesc": "サウンドトラック付きの1〜3分の感動的なビデオ",
+      "music": "パーソナライズされた曲",
+      "musicDesc": "あなたのストーリーについてのオリジナル曲",
+      "book": "イラスト入りの本",
+      "bookDesc": "プロのイラスト付きデジタルブック",
+      "podcast": "ナレーティブポッドキャスト",
+      "podcastDesc": "プロの声でナレーションされたオーディオ"
+    },
+    "pricing": {
+      "title": "プランと料金",
+      "free": "無料",
+      "freeDesc": "コミットメントなしで試す",
+      "freeFeature1": "3つの無料メモリー",
+      "freeFeature2": "すべてのフォーマット",
+      "freeFeature3": "HD品質",
+      "creator": "クリエイター",
+      "creatorDesc": "コンテンツクリエイター向け",
+      "creatorFeature1": "月20メモリー",
+      "creatorFeature2": "透かしなし",
+      "creatorFeature3": "優先サポート",
+      "pro": "プロ",
+      "proDesc": "プロフェッショナル使用向け",
+      "proFeature1": "無制限のメモリー",
+      "proFeature2": "APIアクセス",
+      "proFeature3": "商用利用",
+      "month": "/月",
+      "startFree": "無料で始める",
+      "upgrade": "アップグレード"
+    }
+  },
+  "dashboard": {
+    "welcome": "こんにちは、{{name}}さん!",
+    "subtitle": "ストーリーを語り、人工知能でアートに変換しましょう",
+    "createTitle": "新しいメモリーを作成",
+    "createDesc": "個人的なストーリー、特別な思い出、または印象的な瞬間を共有してください",
+    "storyLabel": "あなたのストーリー",
+    "storyPlaceholder": "昔々...ここにあなたのストーリーを語ってください。詳細が多いほど、結果が良くなります!",
+    "charactersCount": "{{count}}文字 • 推奨最小:100文字",
+    "selectFormats": "フォーマットを選択",
+    "creating": "メモリーを作成中...",
+    "createMemory": "メモリーを作成",
+    "fast": "高速",
+    "fastDesc": "メモリーは5〜10分で完成します",
+    "professional": "プロフェッショナル",
+    "professionalDesc": "AIによって作成された映画品質",
+    "yourMemories": "あなたのメモリー",
+    "yourMemoriesDesc": "いつでもあなたの作品にアクセスしてダウンロードできます"
+  },
+  "memories": {
+    "title": "マイ",
+    "titleHighlight": "メモリー",
+    "count": "{{count}}個のメモリーを作成しました",
+    "count_plural": "{{count}}個のメモリーを作成しました",
+    "empty": "まだメモリーがありません",
+    "emptyDesc": "最初のメモリーを作成して、あなたのストーリーをアートに変換しましょう!",
+    "createFirst": "最初のメモリーを作成",
+    "status": {
+      "processing": "処理中",
+      "completed": "完了",
+      "failed": "失敗"
+    },
+    "createdAgo": "{{time}}に作成",
+    "view": "表示",
+    "download": "ダウンロード",
+    "processing": "処理中...",
+    "tryAgain": "再試行"
+  },
+  "formats": {
+    "video": "映画のようなビデオ",
+    "videoDesc": "1〜3分の感動的なビデオ",
+    "music": "パーソナライズされた曲",
+    "musicDesc": "あなたのストーリーについての曲",
+    "book": "イラスト入りの本",
+    "bookDesc": "プロフェッショナルなデジタルブック",
+    "podcast": "ナレーティブポッドキャスト",
+    "podcastDesc": "プロフェッショナルにナレーションされたオーディオ"
+  },
+  "notifications": {
+    "title": "通知",
+    "empty": "通知はありません",
+    "markAsRead": "既読にする",
+    "delete": "削除",
+    "unread": "{{count}}件の未読",
+    "unread_plural": "{{count}}件の未読"
+  },
+  "errors": {
+    "storyRequired": "ストーリーを語ってください",
+    "formatRequired": "少なくとも1つのフォーマットを選択してください",
+    "createError": "メモリーの作成エラー:{{message}}"
+  },
+  "success": {
+    "memoryCreated": "メモリーが作成されました!準備ができたら通知します。"
+  }
+}

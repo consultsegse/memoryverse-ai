@@ -1,0 +1,141 @@
+{
+  "common": {
+    "appName": "MemoryVerse AI",
+    "tagline": "用AI将记忆转化为艺术",
+    "loading": "加载中...",
+    "error": "错误",
+    "success": "成功",
+    "cancel": "取消",
+    "save": "保存",
+    "delete": "删除",
+    "edit": "编辑",
+    "close": "关闭",
+    "back": "返回",
+    "next": "下一步",
+    "logout": "退出"
+  },
+  "nav": {
+    "howItWorks": "如何使用",
+    "formats": "格式",
+    "pricing": "价格",
+    "dashboard": "控制面板",
+    "myMemories": "我的记忆",
+    "newMemory": "新记忆"
+  },
+  "home": {
+    "hero": {
+      "title": "您的故事",
+      "titleHighlight": "值得永恒",
+      "description": "讲述您的故事,几分钟内即可获得电影级视频、个性化歌曲、插图书籍等。全部由人工智能创建。",
+      "cta": "创建我的第一个记忆",
+      "viewExamples": "查看示例",
+      "benefit1": "3个免费记忆",
+      "benefit2": "无需信用卡",
+      "benefit3": "5分钟完成"
+    },
+    "howItWorks": {
+      "title": "如何使用",
+      "step1Title": "讲述您的故事",
+      "step1Desc": "写下或录制您的记忆。可以是生活中任何特殊时刻。",
+      "step2Title": "选择格式",
+      "step2Desc": "选择接收方式:视频、音乐、书籍、播客或全部!",
+      "step3Title": "几分钟内收到",
+      "step3Desc": "我们的AI在5-10分钟内创建专业且感人的内容。"
+    },
+    "formats": {
+      "title": "可用格式",
+      "video": "电影级视频",
+      "videoDesc": "1-3分钟的感人视频配原声",
+      "music": "个性化歌曲",
+      "musicDesc": "关于您故事的原创歌曲",
+      "book": "插图书籍",
+      "bookDesc": "带专业插图的数字书籍",
+      "podcast": "叙事播客",
+      "podcastDesc": "专业配音的音频"
+    },
+    "pricing": {
+      "title": "计划与价格",
+      "free": "免费",
+      "freeDesc": "无承诺试用",
+      "freeFeature1": "3个免费记忆",
+      "freeFeature2": "所有格式",
+      "freeFeature3": "高清质量",
+      "creator": "创作者",
+      "creatorDesc": "适合内容创作者",
+      "creatorFeature1": "每月20个记忆",
+      "creatorFeature2": "无水印",
+      "creatorFeature3": "优先支持",
+      "pro": "专业版",
+      "proDesc": "适合专业使用",
+      "proFeature1": "无限记忆",
+      "proFeature2": "API访问",
+      "proFeature3": "商业使用",
+      "month": "/月",
+      "startFree": "免费开始",
+      "upgrade": "升级"
+    }
+  },
+  "dashboard": {
+    "welcome": "您好,{{name}}!",
+    "subtitle": "讲述一个故事,用人工智能将其转化为艺术",
+    "createTitle": "创建新记忆",
+    "createDesc": "分享个人故事、特殊记忆或难忘时刻",
+    "storyLabel": "您的故事",
+    "storyPlaceholder": "从前...在这里讲述您的故事。细节越多,结果越好!",
+    "charactersCount": "{{count}}个字符 • 建议最少:100个字符",
+    "selectFormats": "选择格式",
+    "creating": "正在创建您的记忆...",
+    "createMemory": "创建记忆",
+    "fast": "快速",
+    "fastDesc": "您的记忆在5-10分钟内完成",
+    "professional": "专业",
+    "professionalDesc": "AI创建的电影级质量",
+    "yourMemories": "您的记忆",
+    "yourMemoriesDesc": "随时访问和下载您的创作"
+  },
+  "memories": {
+    "title": "我的",
+    "titleHighlight": "记忆",
+    "count": "已创建{{count}}个记忆",
+    "count_plural": "已创建{{count}}个记忆",
+    "empty": "还没有记忆",
+    "emptyDesc": "开始创建您的第一个记忆,将您的故事转化为艺术!",
+    "createFirst": "创建第一个记忆",
+    "status": {
+      "processing": "处理中",
+      "completed": "已完成",
+      "failed": "失败"
+    },
+    "createdAgo": "创建于{{time}}",
+    "view": "查看",
+    "download": "下载",
+    "processing": "处理中...",
+    "tryAgain": "重试"
+  },
+  "formats": {
+    "video": "电影级视频",
+    "videoDesc": "1-3分钟感人视频",
+    "music": "个性化歌曲",
+    "musicDesc": "关于您故事的歌曲",
+    "book": "插图书籍",
+    "bookDesc": "专业数字书籍",
+    "podcast": "叙事播客",
+    "podcastDesc": "专业叙述的音频"
+  },
+  "notifications": {
+    "title": "通知",
+    "empty": "没有通知",
+    "markAsRead": "标记为已读",
+    "delete": "删除",
+    "unread": "{{count}}条未读",
+    "unread_plural": "{{count}}条未读"
+  },
+  "errors": {
+    "storyRequired": "请讲述您的故事",
+    "formatRequired": "至少选择一种格式",
+    "createError": "创建记忆时出错:{{message}}"
+  },
+  "success": {
+    "memoryCreated": "记忆已创建!准备好后我们会通知您。"
+  }
+}

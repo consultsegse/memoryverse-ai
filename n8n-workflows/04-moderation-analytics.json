@@ -1,0 +1,381 @@
+{
+  "name": "MemoryVerse AI - Moderação & Analytics",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 0 * * *"
+            }
+          ]
+        }
+      },
+      "id": "cron-daily",
+      "name": "Cron - Diariamente às 00:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{ $env.VITE_APP_URL }}/api/trpc/analytics.getDailyStats",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "date",
+              "value": "={{ $now.minus({days: 1}).toFormat('yyyy-MM-dd') }}"
+            }
+          ]
+        }
+      },
+      "id": "get-daily-stats",
+      "name": "Buscar Estatísticas Diárias",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "resource": "text",
+        "operation": "message",
+        "modelId": "gpt-4o",
+        "messages": {
+          "values": [
+            {
+              "role": "system",
+              "content": "Você é um analista de dados especializado em métricas de produto SaaS. Crie um relatório executivo conciso e acionável."
+            },
+            {
+              "role": "user",
+              "content": "Dados de ontem:\\n\\nNovos usuários: {{ $json.newUsers }}\\nMemórias criadas: {{ $json.memoriesCreated }}\\nMemórias completadas: {{ $json.memoriesCompleted }}\\nTaxa de conversão: {{ $json.conversionRate }}%\\nReceita: R$ {{ $json.revenue }}\\nChurn: {{ $json.churn }}%\\n\\nCrie um relatório executivo com insights e recomendações."
+            }
+          ]
+        }
+      },
+      "id": "gpt4-report",
+      "name": "GPT-4 - Gerar Relatório",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "fromEmail": "analytics@memoryverse.com.br",
+        "toEmail": "admin@memoryverse.com.br",
+        "subject": "📊 Relatório Diário - {{ $now.minus({days: 1}).toFormat('dd/MM/yyyy') }}",
+        "emailType": "html",
+        "message": "<!DOCTYPE html>\\n<html>\\n<body style=\\\"font-family: Arial; padding: 20px;\\\">\\n  <h2>📊 Relatório Diário - MemoryVerse AI</h2>\\n  \\n  <div style=\\\"background: #f9fafb; padding: 20px; border-radius: 8px; margin: 20px 0;\\\">\\n    <h3>📈 Métricas Principais</h3>\\n    <ul>\\n      <li><strong>Novos Usuários:</strong> {{ $json.newUsers }}</li>\\n      <li><strong>Memórias Criadas:</strong> {{ $json.memoriesCreated }}</li>\\n      <li><strong>Taxa de Conclusão:</strong> {{ $json.completionRate }}%</li>\\n      <li><strong>Receita:</strong> R$ {{ $json.revenue }}</li>\\n      <li><strong>MRR:</strong> R$ {{ $json.mrr }}</li>\\n    </ul>\\n  </div>\\n  \\n  <div style=\\\"background: #fff; padding: 20px; border: 1px solid #e5e7eb; border-radius: 8px;\\\">\\n    <h3>🤖 Análise de IA</h3>\\n    <p>{{ $('GPT-4 - Gerar Relatório').item.json.choices[0].message.content }}</p>\\n  </div>\\n</body>\\n</html>"
+      },
+      "id": "send-daily-report",
+      "name": "Enviar Relatório por Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "moderate-content",
+        "responseMode": "responseNode"
+      },
+      "id": "webhook-moderate",
+      "name": "Webhook - Moderar Conteúdo",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 600]
+    },
+    {
+      "parameters": {
+        "resource": "text",
+        "operation": "message",
+        "modelId": "gpt-4o",
+        "messages": {
+          "values": [
+            {
+              "role": "system",
+              "content": "Você é um moderador de conteúdo. Analise o texto e retorne JSON: {\\\"safe\\\": boolean, \\\"reason\\\": string, \\\"categories\\\": [string], \\\"severity\\\": \\\"low|medium|high\\\"}. Categorias: violence, hate_speech, sexual_content, spam, misinformation, personal_info."
+            },
+            {
+              "role": "user",
+              "content": "Texto para moderar: {{ $json.content }}"
+            }
+          ]
+        },
+        "options": {
+          "responseFormat": "json_object"
+        }
+      },
+      "id": "gpt4-moderate",
+      "name": "GPT-4 - Analisar Conteúdo",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [450, 600]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.choices[0].message.content.safe }}",
+              "value2": false
+            }
+          ]
+        }
+      },
+      "id": "if-unsafe",
+      "name": "Conteúdo Inseguro?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [650, 600]
+    },
+    {
+      "parameters": {
+        "url": "={{ $env.VITE_APP_URL }}/api/trpc/moderation.flagContent",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "contentId",
+              "value": "={{ $json.contentId }}"
+            },
+            {
+              "name": "reason",
+              "value": "={{ $json.choices[0].message.content.reason }}"
+            },
+            {
+              "name": "categories",
+              "value": "={{ $json.choices[0].message.content.categories }}"
+            },
+            {
+              "name": "severity",
+              "value": "={{ $json.choices[0].message.content.severity }}"
+            }
+          ]
+        }
+      },
+      "id": "flag-content",
+      "name": "Sinalizar Conteúdo",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [850, 500]
+    },
+    {
+      "parameters": {
+        "fromEmail": "moderation@memoryverse.com.br",
+        "toEmail": "admin@memoryverse.com.br",
+        "subject": "⚠️ Conteúdo Sinalizado - Revisão Necessária",
+        "emailType": "html",
+        "message": "<!DOCTYPE html>\\n<html>\\n<body>\\n  <h2>⚠️ Alerta de Moderação</h2>\\n  <p><strong>Severidade:</strong> {{ $json.severity }}</p>\\n  <p><strong>Categorias:</strong> {{ $json.categories.join(', ') }}</p>\\n  <p><strong>Razão:</strong> {{ $json.reason }}</p>\\n  <p><strong>Conteúdo ID:</strong> {{ $json.contentId }}</p>\\n  <a href=\\\"{{ $env.VITE_APP_URL }}/admin/moderation/{{ $json.contentId }}\\\">Revisar Conteúdo →</a>\\n</body>\\n</html>"
+      },
+      "id": "alert-admin",
+      "name": "Alertar Administrador",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [1050, 500]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": {
+          "safe": "={{ $json.choices[0].message.content.safe }}",
+          "flagged": true,
+          "message": "Conteúdo sinalizado para revisão"
+        }
+      },
+      "id": "respond-flagged",
+      "name": "Responder - Sinalizado",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1250, 500]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": {
+          "safe": true,
+          "flagged": false,
+          "message": "Conteúdo aprovado"
+        }
+      },
+      "id": "respond-safe",
+      "name": "Responder - Aprovado",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [850, 700]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 */6 * * *"
+            }
+          ]
+        }
+      },
+      "id": "cron-6hours",
+      "name": "Cron - A cada 6 horas",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [250, 900]
+    },
+    {
+      "parameters": {
+        "url": "={{ $env.VITE_APP_URL }}/api/trpc/backup.createSnapshot",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "timestamp",
+              "value": "={{ $now.toISO() }}"
+            }
+          ]
+        }
+      },
+      "id": "create-backup",
+      "name": "Criar Backup do Banco",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [450, 900]
+    },
+    {
+      "parameters": {
+        "operation": "upload",
+        "bucketName": "memoryverse-backups",
+        "fileName": "backup_{{ $now.toFormat('yyyy-MM-dd_HH-mm-ss') }}.sql",
+        "binaryData": true
+      },
+      "id": "upload-backup-s3",
+      "name": "Upload Backup para S3",
+      "type": "n8n-nodes-base.awsS3",
+      "typeVersion": 1,
+      "position": [650, 900]
+    }
+  ],
+  "connections": {
+    "Cron - Diariamente às 00:00": {
+      "main": [
+        [
+          {
+            "node": "Buscar Estatísticas Diárias",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Estatísticas Diárias": {
+      "main": [
+        [
+          {
+            "node": "GPT-4 - Gerar Relatório",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GPT-4 - Gerar Relatório": {
+      "main": [
+        [
+          {
+            "node": "Enviar Relatório por Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook - Moderar Conteúdo": {
+      "main": [
+        [
+          {
+            "node": "GPT-4 - Analisar Conteúdo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GPT-4 - Analisar Conteúdo": {
+      "main": [
+        [
+          {
+            "node": "Conteúdo Inseguro?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Conteúdo Inseguro?": {
+      "main": [
+        [
+          {
+            "node": "Sinalizar Conteúdo",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder - Aprovado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sinalizar Conteúdo": {
+      "main": [
+        [
+          {
+            "node": "Alertar Administrador",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Alertar Administrador": {
+      "main": [
+        [
+          {
+            "node": "Responder - Sinalizado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cron - A cada 6 horas": {
+      "main": [
+        [
+          {
+            "node": "Criar Backup do Banco",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Criar Backup do Banco": {
+      "main": [
+        [
+          {
+            "node": "Upload Backup para S3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

@@ -1,0 +1,390 @@
+{
+  "name": "MemoryVerse AI - Geração de Vídeo Completo",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "generate-video",
+        "responseMode": "responseNode"
+      },
+      "id": "webhook-generate-video",
+      "name": "Webhook - Gerar Vídeo",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "resource": "text",
+        "operation": "message",
+        "modelId": "gpt-4-turbo-preview",
+        "messages": {
+          "values": [
+            {
+              "role": "system",
+              "content": "Você é um diretor de cinema especializado em criar cenas visuais detalhadas. Para cada cena, descreva: composição, iluminação, cores, movimento de câmera, elementos visuais. Retorne um JSON com array de cenas."
+            },
+            {
+              "role": "user",
+              "content": "Roteiro: {{ $json.script }}\n\nCrie 5-8 cenas visuais detalhadas em formato JSON: [{\"scene\": 1, \"duration\": 10, \"description\": \"...\", \"prompt\": \"...\"}]"
+            }
+          ]
+        },
+        "options": {
+          "temperature": 0.7,
+          "responseFormat": "json_object"
+        }
+      },
+      "id": "gpt4-scenes",
+      "name": "GPT-4 - Criar Cenas",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "scenes",
+        "options": {}
+      },
+      "id": "split-scenes",
+      "name": "Separar Cenas",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "generate",
+        "prompt": "={{ $json.prompt }}. Cinematic, 4K, professional photography, dramatic lighting",
+        "model": "dall-e-3",
+        "options": {
+          "size": "1792x1024",
+          "quality": "hd",
+          "style": "vivid"
+        }
+      },
+      "id": "dalle-scene-image",
+      "name": "DALL-E - Gerar Imagem da Cena",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.data[0].url }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "id": "download-image",
+      "name": "Baixar Imagem",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1050, 300]
+    },
+    {
+      "parameters": {
+        "operation": "upload",
+        "bucketName": "memoryverse-scenes",
+        "fileName": "scene_{{ $json.scene }}_{{ $now.toMillis() }}.png",
+        "binaryData": true
+      },
+      "id": "upload-s3",
+      "name": "Upload para S3",
+      "type": "n8n-nodes-base.awsS3",
+      "typeVersion": 1,
+      "position": [1250, 300],
+      "credentials": {
+        "aws": {
+          "id": "3",
+          "name": "AWS S3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combinationMode": "mergeByPosition",
+        "options": {}
+      },
+      "id": "aggregate-scenes",
+      "name": "Agregar Todas as Cenas",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [1450, 300]
+    },
+    {
+      "parameters": {
+        "resource": "text",
+        "operation": "message",
+        "modelId": "gpt-4-turbo-preview",
+        "messages": {
+          "values": [
+            {
+              "role": "system",
+              "content": "Você é um narrador profissional. Crie uma narração emocionante e envolvente para o vídeo, com pausas naturais e ênfase dramática."
+            },
+            {
+              "role": "user",
+              "content": "Roteiro: {{ $json.script }}\n\nCrie uma narração profissional (2-3 minutos)."
+            }
+          ]
+        }
+      },
+      "id": "gpt4-narration",
+      "name": "GPT-4 - Criar Narração",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [1650, 200]
+    },
+    {
+      "parameters": {
+        "url": "https://api.elevenlabs.io/v1/text-to-speech/{{ $env.ELEVENLABS_VOICE_ID }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "xi-api-key",
+              "value": "={{ $env.ELEVENLABS_API_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "text",
+              "value": "={{ $json.choices[0].message.content }}"
+            },
+            {
+              "name": "model_id",
+              "value": "eleven_multilingual_v2"
+            },
+            {
+              "name": "voice_settings",
+              "value": {
+                "stability": 0.5,
+                "similarity_boost": 0.75
+              }
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "id": "elevenlabs-voice",
+      "name": "ElevenLabs - Gerar Voz",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1850, 200]
+    },
+    {
+      "parameters": {
+        "operation": "upload",
+        "bucketName": "memoryverse-audio",
+        "fileName": "narration_{{ $now.toMillis() }}.mp3",
+        "binaryData": true
+      },
+      "id": "upload-audio-s3",
+      "name": "Upload Áudio para S3",
+      "type": "n8n-nodes-base.awsS3",
+      "typeVersion": 1,
+      "position": [2050, 200]
+    },
+    {
+      "parameters": {
+        "url": "https://api.runwayml.com/v1/generate-video",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "images",
+              "value": "={{ $json.sceneUrls }}"
+            },
+            {
+              "name": "audio",
+              "value": "={{ $json.audioUrl }}"
+            },
+            {
+              "name": "duration",
+              "value": "={{ $json.totalDuration }}"
+            },
+            {
+              "name": "transitions",
+              "value": "fade"
+            }
+          ]
+        }
+      },
+      "id": "runway-video",
+      "name": "Runway ML - Compilar Vídeo",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [2250, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": {
+          "success": true,
+          "videoUrl": "={{ $json.videoUrl }}",
+          "thumbnailUrl": "={{ $json.thumbnailUrl }}"
+        }
+      },
+      "id": "respond-webhook",
+      "name": "Responder Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [2450, 300]
+    }
+  ],
+  "connections": {
+    "Webhook - Gerar Vídeo": {
+      "main": [
+        [
+          {
+            "node": "GPT-4 - Criar Cenas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GPT-4 - Criar Cenas": {
+      "main": [
+        [
+          {
+            "node": "Separar Cenas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Separar Cenas": {
+      "main": [
+        [
+          {
+            "node": "DALL-E - Gerar Imagem da Cena",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DALL-E - Gerar Imagem da Cena": {
+      "main": [
+        [
+          {
+            "node": "Baixar Imagem",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Baixar Imagem": {
+      "main": [
+        [
+          {
+            "node": "Upload para S3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload para S3": {
+      "main": [
+        [
+          {
+            "node": "Agregar Todas as Cenas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agregar Todas as Cenas": {
+      "main": [
+        [
+          {
+            "node": "GPT-4 - Criar Narração",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Runway ML - Compilar Vídeo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GPT-4 - Criar Narração": {
+      "main": [
+        [
+          {
+            "node": "ElevenLabs - Gerar Voz",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ElevenLabs - Gerar Voz": {
+      "main": [
+        [
+          {
+            "node": "Upload Áudio para S3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Áudio para S3": {
+      "main": [
+        [
+          {
+            "node": "Runway ML - Compilar Vídeo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Runway ML - Compilar Vídeo": {
+      "main": [
+        [
+          {
+            "node": "Responder Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

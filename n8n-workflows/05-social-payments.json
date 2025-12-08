@@ -1,0 +1,511 @@
+{
+  "name": "MemoryVerse AI - Redes Sociais & Pagamentos",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "memory-published",
+        "responseMode": "lastNode"
+      },
+      "id": "webhook-memory-published",
+      "name": "Webhook - Memória Publicada",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.autoPost }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "if-autopost",
+      "name": "Auto-Post Ativado?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "resource": "text",
+        "operation": "message",
+        "modelId": "gpt-4o",
+        "messages": {
+          "values": [
+            {
+              "role": "system",
+              "content": "Você é um especialista em marketing de redes sociais. Crie legendas virais e engajadoras para diferentes plataformas. Retorne JSON com: {\\\"instagram\\\": {\\\"caption\\\": string, \\\"hashtags\\\": [string]}, \\\"tiktok\\\": {\\\"caption\\\": string, \\\"hashtags\\\": [string]}, \\\"youtube\\\": {\\\"title\\\": string, \\\"description\\\": string, \\\"tags\\\": [string]}}"
+            },
+            {
+              "role": "user",
+              "content": "Memória: {{ $json.title }}\\nDescrição: {{ $json.description }}\\n\\nCrie legendas otimizadas para Instagram, TikTok e YouTube."
+            }
+          ]
+        },
+        "options": {
+          "responseFormat": "json_object"
+        }
+      },
+      "id": "gpt4-captions",
+      "name": "GPT-4 - Gerar Legendas",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [650, 200]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "operation": "create",
+        "caption": "={{ $json.choices[0].message.content.instagram.caption }}\\n\\n{{ $json.choices[0].message.content.instagram.hashtags.join(' ') }}",
+        "mediaUrl": "={{ $json.videoUrl }}",
+        "additionalFields": {
+          "locationId": ""
+        }
+      },
+      "id": "instagram-post",
+      "name": "Postar no Instagram",
+      "type": "n8n-nodes-base.instagram",
+      "typeVersion": 1,
+      "position": [850, 100],
+      "credentials": {
+        "instagramOAuth2Api": {
+          "id": "5",
+          "name": "Instagram API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://open-api.tiktok.com/share/video/upload/",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth2Api",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "video_url",
+              "value": "={{ $json.videoUrl }}"
+            },
+            {
+              "name": "caption",
+              "value": "={{ $json.choices[0].message.content.tiktok.caption }} {{ $json.choices[0].message.content.tiktok.hashtags.join(' ') }}"
+            },
+            {
+              "name": "privacy_level",
+              "value": "PUBLIC_TO_EVERYONE"
+            }
+          ]
+        }
+      },
+      "id": "tiktok-post",
+      "name": "Postar no TikTok",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [850, 200],
+      "credentials": {
+        "oAuth2Api": {
+          "id": "6",
+          "name": "TikTok API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "upload",
+        "title": "={{ $json.choices[0].message.content.youtube.title }}",
+        "description": "={{ $json.choices[0].message.content.youtube.description }}",
+        "videoUrl": "={{ $json.videoUrl }}",
+        "categoryId": "22",
+        "options": {
+          "tags": "={{ $json.choices[0].message.content.youtube.tags }}",
+          "privacyStatus": "public"
+        }
+      },
+      "id": "youtube-upload",
+      "name": "Upload no YouTube",
+      "type": "n8n-nodes-base.youtube",
+      "typeVersion": 1,
+      "position": [850, 300],
+      "credentials": {
+        "youtubeOAuth2Api": {
+          "id": "7",
+          "name": "YouTube API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $env.VITE_APP_URL }}/api/trpc/socialPosts.create",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "memoryId",
+              "value": "={{ $json.memoryId }}"
+            },
+            {
+              "name": "platforms",
+              "value": {
+                "instagram": "={{ $('Postar no Instagram').item.json.id }}",
+                "tiktok": "={{ $('Postar no TikTok').item.json.share_id }}",
+                "youtube": "={{ $('Upload no YouTube').item.json.id }}"
+              }
+            }
+          ]
+        }
+      },
+      "id": "save-social-posts",
+      "name": "Salvar Posts no DB",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1050, 200]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "stripe-webhook",
+        "responseMode": "responseNode"
+      },
+      "id": "webhook-stripe",
+      "name": "Webhook - Stripe",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 600]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.type }}",
+              "operation": "equals",
+              "value2": "checkout.session.completed"
+            }
+          ]
+        }
+      },
+      "id": "if-checkout-completed",
+      "name": "Checkout Completo?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [450, 600]
+    },
+    {
+      "parameters": {
+        "url": "={{ $env.VITE_APP_URL }}/api/trpc/subscriptions.activate",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "userId",
+              "value": "={{ $json.data.object.client_reference_id }}"
+            },
+            {
+              "name": "subscriptionId",
+              "value": "={{ $json.data.object.subscription }}"
+            },
+            {
+              "name": "plan",
+              "value": "={{ $json.data.object.metadata.plan }}"
+            },
+            {
+              "name": "amount",
+              "value": "={{ $json.data.object.amount_total / 100 }}"
+            }
+          ]
+        }
+      },
+      "id": "activate-subscription",
+      "name": "Ativar Assinatura",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [650, 500]
+    },
+    {
+      "parameters": {
+        "url": "={{ $env.VITE_APP_URL }}/api/trpc/notifications.createCustom",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "userId",
+              "value": "={{ $json.data.object.client_reference_id }}"
+            },
+            {
+              "name": "type",
+              "value": "payment_success"
+            },
+            {
+              "name": "context",
+              "value": {
+                "amount": "R$ {{ $json.data.object.amount_total / 100 }}"
+              }
+            }
+          ]
+        }
+      },
+      "id": "notify-payment-success",
+      "name": "Notificar Pagamento",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [850, 500]
+    },
+    {
+      "parameters": {
+        "fromEmail": "contato@memoryverse.com.br",
+        "toEmail": "={{ $json.data.object.customer_email }}",
+        "subject": "🎉 Pagamento Confirmado - Bem-vindo ao {{ $json.data.object.metadata.plan }}!",
+        "emailType": "html",
+        "message": "<!DOCTYPE html>\\n<html>\\n<body style=\\\"font-family: Arial; padding: 20px;\\\">\\n  <div style=\\\"background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 30px; text-align: center; border-radius: 10px;\\\">\\n    <h1>✅ Pagamento Confirmado!</h1>\\n    <h2 style=\\\"font-size: 36px; margin: 20px 0;\\\">Bem-vindo ao Plano {{ $json.data.object.metadata.plan }}!</h2>\\n  </div>\\n  \\n  <div style=\\\"padding: 30px;\\\">\\n    <p>Seu pagamento de <strong>R$ {{ $json.data.object.amount_total / 100 }}</strong> foi processado com sucesso! 🎊</p>\\n    \\n    <p>Agora você tem acesso total a todos os recursos premium:</p>\\n    \\n    <ul>\\n      <li>✅ Memórias ilimitadas</li>\\n      <li>✅ Qualidade 4K/HD</li>\\n      <li>✅ Sem marca d'água</li>\\n      <li>✅ Suporte prioritário</li>\\n      <li>✅ Download ilimitado</li>\\n    </ul>\\n    \\n    <a href=\\\"https://memoryverse.com.br/dashboard\\\" style=\\\"display: inline-block; background: #7c3aed; color: white; padding: 15px 40px; text-decoration: none; border-radius: 6px; margin: 20px 0;\\\">Acessar Dashboard →</a>\\n    \\n    <p>Obrigado por fazer parte do MemoryVerse AI! 💜</p>\\n  </div>\\n</body>\\n</html>"
+      },
+      "id": "send-payment-email",
+      "name": "Email - Confirmação",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [1050, 500]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.type }}",
+              "operation": "equals",
+              "value2": "customer.subscription.deleted"
+            }
+          ]
+        }
+      },
+      "id": "if-subscription-cancelled",
+      "name": "Assinatura Cancelada?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [650, 700]
+    },
+    {
+      "parameters": {
+        "url": "={{ $env.VITE_APP_URL }}/api/trpc/subscriptions.cancel",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "subscriptionId",
+              "value": "={{ $json.data.object.id }}"
+            }
+          ]
+        }
+      },
+      "id": "cancel-subscription",
+      "name": "Cancelar Assinatura",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [850, 700]
+    },
+    {
+      "parameters": {
+        "fromEmail": "contato@memoryverse.com.br",
+        "toEmail": "={{ $json.data.object.customer_email }}",
+        "subject": "😢 Sentiremos sua falta...",
+        "emailType": "html",
+        "message": "<!DOCTYPE html>\\n<html>\\n<body style=\\\"font-family: Arial; padding: 20px;\\\">\\n  <h2>Sua assinatura foi cancelada</h2>\\n  <p>Sentiremos muito sua falta! 😢</p>\\n  <p>Se mudou de ideia, você pode reativar sua assinatura a qualquer momento.</p>\\n  <p>Gostaríamos de saber o motivo do cancelamento para melhorarmos: <a href=\\\"https://memoryverse.com.br/feedback\\\">Deixar Feedback</a></p>\\n</body>\\n</html>"
+      },
+      "id": "send-cancellation-email",
+      "name": "Email - Cancelamento",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [1050, 700]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": {
+          "received": true
+        }
+      },
+      "id": "respond-stripe-webhook",
+      "name": "Responder Stripe",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1250, 600]
+    }
+  ],
+  "connections": {
+    "Webhook - Memória Publicada": {
+      "main": [
+        [
+          {
+            "node": "Auto-Post Ativado?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Auto-Post Ativado?": {
+      "main": [
+        [
+          {
+            "node": "GPT-4 - Gerar Legendas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GPT-4 - Gerar Legendas": {
+      "main": [
+        [
+          {
+            "node": "Postar no Instagram",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Postar no TikTok",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Upload no YouTube",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postar no Instagram": {
+      "main": [
+        [
+          {
+            "node": "Salvar Posts no DB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postar no TikTok": {
+      "main": [
+        [
+          {
+            "node": "Salvar Posts no DB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload no YouTube": {
+      "main": [
+        [
+          {
+            "node": "Salvar Posts no DB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook - Stripe": {
+      "main": [
+        [
+          {
+            "node": "Checkout Completo?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Assinatura Cancelada?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Checkout Completo?": {
+      "main": [
+        [
+          {
+            "node": "Ativar Assinatura",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ativar Assinatura": {
+      "main": [
+        [
+          {
+            "node": "Notificar Pagamento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notificar Pagamento": {
+      "main": [
+        [
+          {
+            "node": "Email - Confirmação",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email - Confirmação": {
+      "main": [
+        [
+          {
+            "node": "Responder Stripe",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Assinatura Cancelada?": {
+      "main": [
+        [
+          {
+            "node": "Cancelar Assinatura",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cancelar Assinatura": {
+      "main": [
+        [
+          {
+            "node": "Email - Cancelamento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email - Cancelamento": {
+      "main": [
+        [
+          {
+            "node": "Responder Stripe",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

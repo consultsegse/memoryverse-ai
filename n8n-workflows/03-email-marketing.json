@@ -1,0 +1,272 @@
+{
+  "name": "MemoryVerse AI - Email Marketing & Onboarding",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "user-registered",
+        "responseMode": "lastNode"
+      },
+      "id": "webhook-user-registered",
+      "name": "Webhook - Novo Usuário",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "amount": 2,
+        "unit": "minutes"
+      },
+      "id": "wait-2min",
+      "name": "Aguardar 2 minutos",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "fromEmail": "contato@memoryverse.com.br",
+        "toEmail": "={{ $json.email }}",
+        "subject": "🎉 Bem-vindo ao MemoryVerse AI!",
+        "emailType": "html",
+        "message": "<!DOCTYPE html>\n<html>\n<head>\n  <style>\n    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }\n    .container { max-width: 600px; margin: 0 auto; padding: 20px; }\n    .header { background: linear-gradient(135deg, #7c3aed 0%, #3b82f6 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }\n    .content { background: #f9fafb; padding: 30px; }\n    .button { display: inline-block; background: #7c3aed; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; margin: 20px 0; }\n    .feature { background: white; padding: 15px; margin: 10px 0; border-radius: 8px; border-left: 4px solid #7c3aed; }\n  </style>\n</head>\n<body>\n  <div class=\"container\">\n    <div class=\"header\">\n      <h1>✨ Bem-vindo ao MemoryVerse AI!</h1>\n    </div>\n    <div class=\"content\">\n      <p>Olá <strong>{{ $json.name }}</strong>,</p>\n      \n      <p>Estamos muito felizes em ter você conosco! 🎊</p>\n      \n      <p>Você acabou de desbloquear o poder de transformar suas memórias em arte com inteligência artificial.</p>\n      \n      <h3>🎁 Você ganhou 3 memórias grátis!</h3>\n      \n      <div class=\"feature\">\n        <strong>🎬 Vídeos Cinematográficos</strong><br>\n        Transforme suas histórias em vídeos emocionantes com narração profissional\n      </div>\n      \n      <div class=\"feature\">\n        <strong>🎵 Músicas Personalizadas</strong><br>\n        Crie trilhas sonoras únicas baseadas nas suas memórias\n      </div>\n      \n      <div class=\"feature\">\n        <strong>📖 Livros Ilustrados</strong><br>\n        Suas histórias ganham vida em páginas belamente ilustradas\n      </div>\n      \n      <div class=\"feature\">\n        <strong>🎙️ Podcasts Narrativos</strong><br>\n        Transforme memórias em episódios de podcast profissionais\n      </div>\n      \n      <a href=\"https://memoryverse.com.br/dashboard\" class=\"button\">Criar Minha Primeira Memória →</a>\n      \n      <p><strong>Dica:</strong> Quanto mais detalhes você fornecer na sua história, mais rica e emocionante será sua memória!</p>\n      \n      <p>Qualquer dúvida, estamos aqui para ajudar! 💜</p>\n      \n      <p>Abraços,<br><strong>Equipe MemoryVerse AI</strong></p>\n    </div>\n  </div>\n</body>\n</html>",
+        "options": {}
+      },
+      "id": "send-welcome-email",
+      "name": "Enviar Email de Boas-Vindas",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [650, 300],
+      "credentials": {
+        "smtp": {
+          "id": "4",
+          "name": "SMTP Email"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 1,
+        "unit": "days"
+      },
+      "id": "wait-1day",
+      "name": "Aguardar 1 dia",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{ $env.VITE_APP_URL }}/api/trpc/memories.getByUserId",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "userId",
+              "value": "={{ $json.userId }}"
+            }
+          ]
+        }
+      },
+      "id": "check-memories",
+      "name": "Verificar Memórias Criadas",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1050, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ $json.memories.length }}",
+              "operation": "equal",
+              "value2": 0
+            }
+          ]
+        }
+      },
+      "id": "if-no-memories",
+      "name": "Não Criou Memórias?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [1250, 300]
+    },
+    {
+      "parameters": {
+        "fromEmail": "contato@memoryverse.com.br",
+        "toEmail": "={{ $json.email }}",
+        "subject": "💡 Precisa de ajuda para começar?",
+        "emailType": "html",
+        "message": "<!DOCTYPE html>\n<html>\n<body style=\"font-family: Arial; padding: 20px;\">\n  <h2>Olá {{ $json.name }},</h2>\n  \n  <p>Notamos que você ainda não criou sua primeira memória... 😊</p>\n  \n  <p>Sabemos que começar pode parecer difícil, então preparamos algumas ideias para você:</p>\n  \n  <ul>\n    <li>🎂 <strong>Aniversário especial</strong> - Aquele dia inesquecível</li>\n    <li>✈️ <strong>Viagem dos sonhos</strong> - A aventura que mudou tudo</li>\n    <li>👨‍👩‍👧 <strong>Momento em família</strong> - Memórias que aquecem o coração</li>\n    <li>🎓 <strong>Conquista importante</strong> - Aquela vitória que você celebrou</li>\n    <li>💑 <strong>História de amor</strong> - Como tudo começou</li>\n  </ul>\n  \n  <p><strong>É super simples:</strong></p>\n  <ol>\n    <li>Conte sua história (pode ser curta!)</li>\n    <li>Escolha o formato (vídeo, música, livro...)</li>\n    <li>Aguarde 5 minutos</li>\n    <li>Pronto! Sua memória está pronta 🎉</li>\n  </ol>\n  \n  <a href=\"https://memoryverse.com.br/dashboard\" style=\"display: inline-block; background: #7c3aed; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; margin: 20px 0;\">Criar Agora (Ainda tenho 3 grátis!) →</a>\n  \n  <p>Qualquer dúvida, é só responder este email! 💜</p>\n</body>\n</html>"
+      },
+      "id": "send-reminder-email",
+      "name": "Email - Lembrete para Criar",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [1450, 200]
+    },
+    {
+      "parameters": {
+        "amount": 3,
+        "unit": "days"
+      },
+      "id": "wait-3days",
+      "name": "Aguardar 3 dias",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [1450, 400]
+    },
+    {
+      "parameters": {
+        "fromEmail": "contato@memoryverse.com.br",
+        "toEmail": "={{ $json.email }}",
+        "subject": "🎁 Oferta Especial: 50% OFF no Plano Creator!",
+        "emailType": "html",
+        "message": "<!DOCTYPE html>\n<html>\n<body style=\"font-family: Arial; padding: 20px;\">\n  <div style=\"background: linear-gradient(135deg, #7c3aed 0%, #3b82f6 100%); color: white; padding: 30px; text-align: center; border-radius: 10px;\">\n    <h1>🎉 Oferta Exclusiva para Você!</h1>\n    <h2 style=\"font-size: 48px; margin: 20px 0;\">50% OFF</h2>\n    <p style=\"font-size: 20px;\">no Plano Creator por 3 meses</p>\n  </div>\n  \n  <div style=\"padding: 30px;\">\n    <p>Olá {{ $json.name }},</p>\n    \n    <p>Vimos que você adorou suas primeiras memórias! 🎊</p>\n    \n    <p>Preparamos uma oferta <strong>exclusiva</strong> para você continuar criando:</p>\n    \n    <div style=\"background: #f9fafb; padding: 20px; border-radius: 8px; margin: 20px 0;\">\n      <h3>✨ Plano Creator</h3>\n      <p style=\"text-decoration: line-through; color: #999;\">De R$ 97/mês</p>\n      <p style=\"font-size: 32px; color: #7c3aed; font-weight: bold;\">Por apenas R$ 48,50/mês</p>\n      <ul>\n        <li>✅ 50 memórias por mês</li>\n        <li>✅ Todos os formatos (vídeo, música, livro, podcast)</li>\n        <li>✅ Qualidade HD/4K</li>\n        <li>✅ Sem marca d'água</li>\n        <li>✅ Download ilimitado</li>\n        <li>✅ Suporte prioritário</li>\n      </ul>\n    </div>\n    \n    <p><strong>⏰ Oferta válida por 48 horas!</strong></p>\n    \n    <a href=\"https://memoryverse.com.br/pricing?coupon=CREATOR50\" style=\"display: inline-block; background: #7c3aed; color: white; padding: 15px 40px; text-decoration: none; border-radius: 6px; font-size: 18px; margin: 20px 0;\">Aproveitar Oferta →</a>\n    \n    <p>Não perca essa chance! 💜</p>\n  </div>\n</body>\n</html>"
+      },
+      "id": "send-upsell-email",
+      "name": "Email - Upsell 50% OFF",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [1650, 400]
+    },
+    {
+      "parameters": {
+        "amount": 7,
+        "unit": "days"
+      },
+      "id": "wait-7days",
+      "name": "Aguardar 7 dias",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [1850, 400]
+    },
+    {
+      "parameters": {
+        "fromEmail": "contato@memoryverse.com.br",
+        "toEmail": "={{ $json.email }}",
+        "subject": "📊 Como está sendo sua experiência?",
+        "emailType": "html",
+        "message": "<!DOCTYPE html>\n<html>\n<body style=\"font-family: Arial; padding: 20px;\">\n  <h2>Olá {{ $json.name }},</h2>\n  \n  <p>Esperamos que esteja adorando o MemoryVerse AI! 💜</p>\n  \n  <p>Gostaríamos muito de saber sua opinião para melhorarmos ainda mais:</p>\n  \n  <div style=\"text-align: center; margin: 30px 0;\">\n    <p><strong>Como você avalia sua experiência?</strong></p>\n    <a href=\"https://memoryverse.com.br/feedback?rating=5&userId={{ $json.userId }}\" style=\"display: inline-block; margin: 5px; font-size: 30px;\">⭐⭐⭐⭐⭐</a><br>\n    <a href=\"https://memoryverse.com.br/feedback?rating=4&userId={{ $json.userId }}\" style=\"display: inline-block; margin: 5px; font-size: 30px;\">⭐⭐⭐⭐</a><br>\n    <a href=\"https://memoryverse.com.br/feedback?rating=3&userId={{ $json.userId }}\" style=\"display: inline-block; margin: 5px; font-size: 30px;\">⭐⭐⭐</a>\n  </div>\n  \n  <p>Seu feedback é muito importante para nós! 🙏</p>\n  \n  <p>Obrigado por fazer parte da nossa comunidade!</p>\n</body>\n</html>"
+      },
+      "id": "send-feedback-email",
+      "name": "Email - Solicitar Feedback",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [2050, 400]
+    }
+  ],
+  "connections": {
+    "Webhook - Novo Usuário": {
+      "main": [
+        [
+          {
+            "node": "Aguardar 2 minutos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aguardar 2 minutos": {
+      "main": [
+        [
+          {
+            "node": "Enviar Email de Boas-Vindas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar Email de Boas-Vindas": {
+      "main": [
+        [
+          {
+            "node": "Aguardar 1 dia",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aguardar 1 dia": {
+      "main": [
+        [
+          {
+            "node": "Verificar Memórias Criadas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar Memórias Criadas": {
+      "main": [
+        [
+          {
+            "node": "Não Criou Memórias?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Não Criou Memórias?": {
+      "main": [
+        [
+          {
+            "node": "Email - Lembrete para Criar",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Aguardar 3 dias",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aguardar 3 dias": {
+      "main": [
+        [
+          {
+            "node": "Email - Upsell 50% OFF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email - Upsell 50% OFF": {
+      "main": [
+        [
+          {
+            "node": "Aguardar 7 dias",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aguardar 7 dias": {
+      "main": [
+        [
+          {
+            "node": "Email - Solicitar Feedback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

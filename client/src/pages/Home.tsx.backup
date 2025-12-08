@@ -1,0 +1,288 @@
+import { useAuth } from "@/_core/hooks/useAuth";
+import { Button } from "@/components/ui/button";
+import { NotificationCenter } from "@/components/NotificationCenter";
+import { LanguageSelector } from "@/components/LanguageSelector";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { getLoginUrl } from "@/const";
+import { Heart, Music, BookOpen, Video, Mic, Sparkles, Check, ArrowRight, Mail } from "lucide-react";
+import { Link } from "wouter";
+import { useTranslation } from 'react-i18next';
+
+export default function Home() {
+  const { isAuthenticated } = useAuth();
+  const { t } = useTranslation();
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-purple-50 via-white to-blue-50">
+      {/* Header */}
+      <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-8 w-8 text-purple-600" />
+            <span className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+              {t('common.appName')}
+            </span>
+          </div>
+          <nav className="hidden md:flex items-center gap-6">
+            <a href="#como-funciona" className="text-gray-600 hover:text-purple-600 transition">{t('nav.howItWorks')}</a>
+            <a href="#formatos" className="text-gray-600 hover:text-purple-600 transition">{t('nav.formats')}</a>
+            <a href="#precos" className="text-gray-600 hover:text-purple-600 transition">{t('nav.pricing')}</a>
+            <LanguageSelector />
+            {isAuthenticated && <NotificationCenter />}
+            {isAuthenticated ? (
+              <Link href="/dashboard">
+                <Button>{t('nav.dashboard')}</Button>
+              </Link>
+            ) : (
+              <Button asChild>
+                <a href={getLoginUrl()}>{t('home.pricing.startFree')}</a>
+              </Button>
+            )}
+          </nav>
+        </div>
+      </header>
+
+      {/* Hero Section */}
+      <section className="container mx-auto px-4 py-20 text-center">
+        <div className="max-w-4xl mx-auto space-y-8">
+          <div className="inline-block px-4 py-2 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">
+            ✨ {t('common.tagline')}
+          </div>
+          <h1 className="text-5xl md:text-7xl font-bold leading-tight">
+            {t('home.hero.title')}
+            <br />
+            <span className="bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 bg-clip-text text-transparent">
+              {t('home.hero.titleHighlight')}
+            </span>
+          </h1>
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            {t('home.hero.description')}
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button size="lg" className="text-lg px-8" asChild>
+              <a href={isAuthenticated ? "/dashboard" : getLoginUrl()}>
+                {t('home.hero.cta')} <ArrowRight className="ml-2 h-5 w-5" />
+              </a>
+            </Button>
+            <Link href="/pricing">
+              <Button size="lg" variant="outline" className="text-lg px-8">
+                Ver Preços
+              </Button>
+            </Link>
+          </div>
+          <div className="flex items-center justify-center gap-8 text-sm text-gray-600">
+            <div className="flex items-center gap-2">
+              <Check className="h-5 w-5 text-green-600" />
+              <span>{t('home.hero.benefit1')}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Check className="h-5 w-5 text-green-600" />
+              <span>{t('home.hero.benefit2')}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Check className="h-5 w-5 text-green-600" />
+              <span>{t('home.hero.benefit3')}</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Como Funciona */}
+      <section id="como-funciona" className="py-20 bg-white">
+        <div className="container mx-auto px-4">
+          <h2 className="text-4xl font-bold text-center mb-12">{t('home.howItWorks.title')}</h2>
+          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            {[
+              { step: "1", title: t('home.howItWorks.step1Title'), desc: t('home.howItWorks.step1Desc') },
+              { step: "2", title: t('home.howItWorks.step2Title'), desc: t('home.howItWorks.step2Desc') },
+              { step: "3", title: t('home.howItWorks.step3Title'), desc: t('home.howItWorks.step3Desc') }
+            ].map((item) => (
+              <Card key={item.step} className="text-center">
+                <CardHeader>
+                  <div className="w-16 h-16 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
+                    {item.step}
+                  </div>
+                  <CardTitle>{item.title}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription className="text-base">{item.desc}</CardDescription>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Formatos */}
+      <section id="formatos" className="py-20">
+        <div className="container mx-auto px-4">
+          <h2 className="text-4xl font-bold text-center mb-4">{t('home.formats.title')}</h2>
+          <p className="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
+            Uma história, infinitas possibilidades. Escolha o formato perfeito para sua memória.
+          </p>
+          <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+            {[
+              { icon: Video, title: t('home.formats.video'), desc: t('home.formats.videoDesc') },
+              { icon: Music, title: t('home.formats.music'), desc: t('home.formats.musicDesc') },
+              { icon: BookOpen, title: t('home.formats.book'), desc: t('home.formats.bookDesc') },
+              { icon: Mic, title: t('home.formats.podcast'), desc: t('home.formats.podcastDesc') },
+              { icon: Heart, title: "Animação 2D", desc: "Desenho animado da sua memória" },
+              { icon: Sparkles, title: "NFT Exclusivo", desc: "Transforme em arte digital colecionável" }
+            ].map((format) => (
+              <Card key={format.title} className="hover:shadow-lg transition">
+                <CardHeader>
+                  <format.icon className="h-12 w-12 text-purple-600 mb-2" />
+                  <CardTitle>{format.title}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription>{format.desc}</CardDescription>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Preços */}
+      <section id="precos" className="py-20 bg-white">
+        <div className="container mx-auto px-4">
+          <h2 className="text-4xl font-bold text-center mb-12">{t('home.pricing.title')}</h2>
+          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            {[
+              {
+                name: t('home.pricing.free'),
+                price: "R$ 0",
+                period: "para sempre",
+                features: [t('home.pricing.freeFeature1'), t('home.pricing.freeFeature2'), t('home.pricing.freeFeature3'), "Resolução HD"],
+                cta: t('home.pricing.startFree'),
+                popular: false
+              },
+              {
+                name: t('home.pricing.creator'),
+                price: "R$ 97",
+                period: t('home.pricing.month'),
+                features: [t('home.pricing.creatorFeature1'), t('home.pricing.creatorFeature2'), t('home.pricing.creatorFeature3'), "Galeria privada"],
+                cta: "Assinar Agora",
+                popular: true
+              },
+              {
+                name: t('home.pricing.pro'),
+                price: "R$ 297",
+                period: t('home.pricing.month'),
+                features: [t('home.pricing.proFeature1'), t('home.pricing.proFeature2'), t('home.pricing.proFeature3'), "NFTs inclusos"],
+                cta: "Falar com Vendas",
+                popular: false
+              }
+            ].map((plan) => (
+              <Card key={plan.name} className={`relative ${plan.popular ? 'border-purple-600 border-2 shadow-xl' : ''}`}>
+                {plan.popular && (
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-purple-600 text-white px-4 py-1 rounded-full text-sm font-medium">
+                    Mais Popular
+                  </div>
+                )}
+                <CardHeader>
+                  <CardTitle>{plan.name}</CardTitle>
+                  <div className="mt-4">
+                    <span className="text-4xl font-bold">{plan.price}</span>
+                    <span className="text-gray-600">{plan.period}</span>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <ul className="space-y-3">
+                    {plan.features.map((feature) => (
+                      <li key={feature} className="flex items-center gap-2">
+                        <Check className="h-5 w-5 text-green-600 flex-shrink-0" />
+                        <span className="text-sm">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <Button className="w-full" variant={plan.popular ? "default" : "outline"} asChild>
+                    <a href={getLoginUrl()}>{plan.cta}</a>
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Final */}
+      <section className="py-20 bg-gradient-to-r from-purple-600 to-blue-600 text-white">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-4xl font-bold mb-4">Pronto para Eternizar Suas Memórias?</h2>
+          <p className="text-xl mb-8 opacity-90">
+            Comece gratuitamente. Sem cartão de crédito. Cancele quando quiser.
+          </p>
+          <Button size="lg" variant="secondary" className="text-lg px-8" asChild>
+            <a href={getLoginUrl()}>
+              {t('home.hero.cta')} <ArrowRight className="ml-2 h-5 w-5" />
+            </a>
+          </Button>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-gray-900 text-gray-400 py-12">
+        <div className="container mx-auto px-4">
+          <div className="grid md:grid-cols-4 gap-8">
+            <div>
+              <div className="flex items-center gap-2 mb-4">
+                <Sparkles className="h-6 w-6 text-purple-400" />
+                <span className="text-white font-bold">{t('common.appName')}</span>
+              </div>
+              <p className="text-sm mb-4">Transformando memórias em arte desde 2024.</p>
+              <div className="flex gap-3">
+                <a href="https://instagram.com/memoryverseai" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-purple-400 transition">
+                  <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                </a>
+                <a href="https://tiktok.com/@memoryverseai" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-purple-400 transition">
+                  <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005 20.1a6.34 6.34 0 0010.86-4.43v-7a8.16 8.16 0 004.77 1.52v-3.4a4.85 4.85 0 01-1-.1z"/></svg>
+                </a>
+                <a href="https://youtube.com/@mymemoryverseai" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-purple-400 transition">
+                  <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                </a>
+              </div>
+            </div>
+            <div>
+              <h3 className="text-white font-semibold mb-4">Produto</h3>
+              <ul className="space-y-2 text-sm">
+                <li><a href="#how-it-works" className="hover:text-white transition">{t('nav.howItWorks')}</a></li>
+                <li><a href="#formats" className="hover:text-white transition">{t('nav.formats')}</a></li>
+                <li><a href="#pricing" className="hover:text-white transition">{t('nav.pricing')}</a></li>
+                <li><a href="/notifications-demo" className="hover:text-white transition">Demo de Notificações</a></li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="text-white font-semibold mb-4">Empresa</h3>
+              <ul className="space-y-2 text-sm">
+                <li><a href="/about" className="hover:text-white transition">Sobre</a></li>
+                <li><a href="/contact" className="hover:text-white transition">Contato</a></li>
+                <li><a href="#" className="hover:text-white transition">Blog</a></li>
+                <li><a href="#" className="hover:text-white transition">Carreiras</a></li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="text-white font-semibold mb-4">Contato</h3>
+              <ul className="space-y-2 text-sm">
+                <li>
+                  <a href="mailto:contato@memoryverse.com.br" className="hover:text-white transition flex items-center gap-2">
+                    <Mail className="h-4 w-4" />
+                    contato@memoryverse.com.br
+                  </a>
+                </li>
+              </ul>
+              <h3 className="text-white font-semibold mb-4 mt-6">Legal</h3>
+              <ul className="space-y-2 text-sm">
+                <li><a href="#" className="hover:text-white transition">Privacidade</a></li>
+                <li><a href="#" className="hover:text-white transition">Termos</a></li>
+              </ul>
+            </div>
+          </div>
+          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm">
+            <p>&copy; 2024 {t('common.appName')}. Todos os direitos reservados.</p>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}
