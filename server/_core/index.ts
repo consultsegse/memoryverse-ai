@@ -63,13 +63,17 @@ async function startServer() {
     const { getDb } = await import("../db");
     const db = await getDb();
     if (db) {
-      console.log("Running DB migrations...");
+      const migrationsFolder = path.join(process.cwd(), "drizzle");
+      console.log(`[Startup] Running DB migrations from: ${migrationsFolder}`);
+
       const { migrate } = await import("drizzle-orm/node-postgres/migrator");
-      await migrate(db, { migrationsFolder: path.join(process.cwd(), "drizzle") });
-      console.log("Migrations completed successfully.");
+      await migrate(db, { migrationsFolder });
+
+      console.log("[Startup] Migrations completed successfully.");
     }
   } catch (err) {
-    console.error("Migration failed:", err);
+    console.error("[Startup] CRITICAL: Migration failed. Exiting...", err);
+    process.exit(1);
   }
 
   // tRPC API
