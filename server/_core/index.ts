@@ -60,7 +60,7 @@ async function startServer() {
   // OAuth routes removed
   // registerOAuthRoutes(app);
   // DB Migration & Health Check
-  const waitForDatabase = async (attempts = 10, delay = 5000) => {
+  const waitForDatabase = async (attempts = 60, delay = 5000) => {
     while (attempts > 0) {
       try {
         const { getDb } = await import("../db");
@@ -94,8 +94,8 @@ async function startServer() {
   } catch (err: any) {
     console.error("[Startup] Migration failed:", err.message);
 
-    // Self-healing: If migration history is corrupted (file not found), wipe and retry
-    if (err.message.includes("not found") || err.message.includes("mismatch") || err.message.includes("checksum") || err.code === "22000") {
+    // Self-healing: If migration history is corrupted (file not found), or tables already exist, wipe and retry
+    if (err.message.includes("not found") || err.message.includes("mismatch") || err.message.includes("checksum") || err.message.includes("already exists") || err.message.includes("duplicate") || err.message.includes("CREATE TABLE") || err.code === "22000" || err.code === "42P07") {
       console.log("[Startup] 🚨 DETECTED CORRUPTED MIGRATION STATE. INITIATING AUTO-REPAIR (RESET DB)...");
       try {
         const { getDb } = await import("../db");
