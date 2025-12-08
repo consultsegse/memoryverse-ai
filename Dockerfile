@@ -6,6 +6,7 @@ WORKDIR /app
 
 # Install dependencies based on the preferred package manager
 COPY package.json pnpm-lock.yaml* ./
+COPY patches ./patches
 RUN npm install -g pnpm && pnpm i --frozen-lockfile
 
 # Rebuild the source code only when needed
@@ -23,7 +24,7 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
-# Install pnpm and pg (for production runtime if not bundled perfectly)
+# Install pnpm (for runtime if needed, though usually node_modules is enough)
 RUN npm install -g pnpm
 
 COPY --from=builder /app/dist ./dist
