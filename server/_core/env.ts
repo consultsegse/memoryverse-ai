@@ -5,7 +5,5 @@ export const ENV = {
   // oAuthServerUrl removed
   ownerOpenId: process.env.OWNER_OPEN_ID ?? "",
   isProduction: process.env.NODE_ENV === "production",
-  forgeApiUrl: process.env.BUILT_IN_FORGE_API_URL ?? "",
-  forgeApiKey: process.env.BUILT_IN_FORGE_API_KEY ?? "",
   n8nWebhookUrl: process.env.N8N_WEBHOOK_URL ?? "",
 };
