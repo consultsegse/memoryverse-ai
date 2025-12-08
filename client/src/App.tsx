@@ -14,6 +14,9 @@ import { AffiliateDashboard } from "./pages/AffiliateDashboard";
 import { Referral } from "./pages/Referral";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import MemoryDetail from "./pages/MemoryDetail";
+import AdminModeration from "./pages/Admin";
+import Feedback from "./pages/Feedback";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -21,7 +24,10 @@ function Router() {
     <Switch>
       <Route path={"/"} component={Home} />
       <Route path="/dashboard" component={Dashboard} />
+      <Route path="/my-memories/:id" component={MemoryDetail} />
       <Route path="/my-memories" component={MyMemories} />
+      <Route path="/admin/moderation" component={AdminModeration} />
+      <Route path="/feedback" component={Feedback} />
       <Route path="/notifications-demo" component={NotificationDemo} />
       <Route path="/contact" component={Contact} />
       <Route path="/pricing" component={Pricing} />

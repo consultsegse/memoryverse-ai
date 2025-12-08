@@ -259,20 +259,34 @@ export const appRouter = router({
           const format = input.formats[i];
 
           if (memoryId) {
+            // Priority: Try n8n Webhook -> Fallback to Local Processing
+            let usedFallback = false;
+
             if (ENV.n8nWebhookUrl) {
-              // Trigger n8n webhook
-              fetch(`${ENV.n8nWebhookUrl}/memory-created`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  memoryId,
-                  userId: ctx.user.id,
-                  story: input.story,
-                  format,
-                  title: input.story.substring(0, 50) + "...",
-                }),
-              }).catch(err => console.error("[Manual] API n8n Webhook failed:", err));
+              try {
+                // Trigger n8n webhook
+                const response = await fetch(`${ENV.n8nWebhookUrl}/memory-created`, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    memoryId,
+                    userId: ctx.user.id,
+                    story: input.story,
+                    format,
+                    title: input.story.substring(0, 50) + "...",
+                  }),
+                });
+
+                if (!response.ok) throw new Error(`Webhook Status: ${response.status}`);
+              } catch (err) {
+                console.error("[Router] API n8n Webhook failed, falling back to local:", err);
+                usedFallback = true;
+              }
             } else {
+              usedFallback = true;
+            }
+
+            if (usedFallback) {
               // Fallback to local processing
               const { queueMemoryProcessing } = await import("./ai/memoryProcessor");
               queueMemoryProcessing(memoryId, input.story, format as "video" | "music" | "book" | "podcast");
@@ -291,6 +305,24 @@ export const appRouter = router({
         });
 
         return { success: true, count: input.formats.length, creditsRemaining: user.creditsRemaining - creditsNeeded };
+      }),
+
+    getById: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ ctx, input }) => {
+        const { getDb } = await import("./db");
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { memories } = await import("../drizzle/schema");
+        const { eq, and } = await import("drizzle-orm");
+
+        const [memory] = await db.select()
+          .from(memories)
+          .where(and(eq(memories.id, input.id), eq(memories.userId, ctx.user.id)));
+
+        if (!memory) throw new Error("Memory not found");
+        return memory;
       }),
 
     list: protectedProcedure.query(async ({ ctx }) => {
