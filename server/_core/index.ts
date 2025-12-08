@@ -43,6 +43,11 @@ async function startServer() {
     }
   );
 
+  // Health check endpoint for Easypanel/Load Balancers
+  app.get("/health", (_req, res) => {
+    res.status(200).send("OK");
+  });
+
   // Configure body parser with larger size limit for file uploads
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
