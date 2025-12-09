@@ -42,11 +42,16 @@ WORKDIR /app
 RUN python3 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
-# Install PyTorch CPU (lighter, no GPU needed)
+# Install PyTorch CPU with compatible versions
 RUN pip3 install --no-cache-dir \
     "numpy<2" \
-    torch torchvision torchaudio \
+    "torch==2.1.0" \
+    "torchvision==0.16.0" \
+    "torchaudio==2.1.0" \
     --index-url https://download.pytorch.org/whl/cpu
+
+# Install compatible transformers version
+RUN pip3 install --no-cache-dir "transformers<4.36"
 
 # Install AudioCraft (MusicGen)
 RUN pip3 install --no-cache-dir audiocraft
