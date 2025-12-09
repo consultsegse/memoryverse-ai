@@ -10,7 +10,7 @@ import { toast } from "sonner";
 
 export default function NotificationDemo() {
   const { user, logout } = useAuth();
-  
+
   const createNotificationMutation = trpc.notifications.createCustom.useMutation({
     onSuccess: () => {
       toast.success("Notificação criada com sucesso!");
@@ -100,7 +100,7 @@ export default function NotificationDemo() {
               </span>
             </div>
           </Link>
-          
+
           <div className="flex items-center gap-4">
             <LanguageSelector />
             <NotificationCenter />
@@ -142,7 +142,7 @@ export default function NotificationDemo() {
               </p>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">⚡ Prioridades</CardTitle>
@@ -153,7 +153,7 @@ export default function NotificationDemo() {
               </p>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">📧 Email Integrado</CardTitle>
@@ -181,12 +181,14 @@ export default function NotificationDemo() {
                     <Button
                       size="sm"
                       onClick={() => {
+                        if (!user) return;
                         createNotificationMutation.mutate({
+                          userId: user.id,
                           type: example.type,
                           context: example.context,
                         });
                       }}
-                      disabled={createNotificationMutation.isPending}
+                      disabled={createNotificationMutation.isPending || !user}
                     >
                       <Send className="h-4 w-4 mr-2" />
                       Criar

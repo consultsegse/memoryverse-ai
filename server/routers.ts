@@ -113,6 +113,14 @@ export const appRouter = router({
         const cookieOptions = getSessionCookieOptions(ctx.req);
         ctx.res.cookie(COOKIE_NAME, token, { ...cookieOptions, maxAge: 31536000000 });
 
+        // Trigger n8n webhook for email marketing automation (non-blocking)
+        import("./integrations/n8nClient").then(({ triggerUserRegistered }) => {
+          const userName = newUser.name ?? newUser.email ?? "User";
+          triggerUserRegistered(newUser.id, newUser.email ?? "", userName).catch(err => {
+            console.error("[Router] Failed to trigger user registration webhook:", err);
+          });
+        });
+
         return { success: true };
       }),
 
@@ -253,46 +261,52 @@ export const appRouter = router({
           Array.from({ length: creditsNeeded }, (_, i) => insertResult.insertId + i) :
           [];
 
+        // Import n8n client
+        const { triggerMemoryProcessing } = await import("./integrations/n8nClient");
+
         // Process each memory
+        const processingResults = [];
         for (let i = 0; i < input.formats.length; i++) {
           const memoryId = insertedIds[i];
           const format = input.formats[i];
 
           if (memoryId) {
-            // Priority: Try n8n Webhook -> Fallback to Local Processing
-            let usedFallback = false;
+            // Try n8n webhook with automatic retry and fallback
+            const result = await triggerMemoryProcessing({
+              memoryId,
+              userId: ctx.user.id,
+              story: input.story,
+              format,
+              title: input.story.substring(0, 50) + "...",
+            });
 
-            if (ENV.n8nWebhookUrl) {
-              try {
-                // Trigger n8n webhook
-                const response = await fetch(`${ENV.n8nWebhookUrl}/memory-created`, {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    memoryId,
-                    userId: ctx.user.id,
-                    story: input.story,
-                    format,
-                    title: input.story.substring(0, 50) + "...",
-                  }),
-                });
+            processingResults.push({
+              memoryId,
+              format,
+              n8nSuccess: result.success,
+              usedFallback: result.usedFallback,
+            });
 
-                if (!response.ok) throw new Error(`Webhook Status: ${response.status}`);
-              } catch (err) {
-                console.error("[Router] API n8n Webhook failed, falling back to local:", err);
-                usedFallback = true;
-              }
-            } else {
-              usedFallback = true;
-            }
-
-            if (usedFallback) {
-              // Fallback to local processing
+            // If n8n failed, use local fallback
+            if (result.usedFallback) {
               const { queueMemoryProcessing } = await import("./ai/memoryProcessor");
               queueMemoryProcessing(memoryId, input.story, format as "video" | "music" | "book" | "podcast");
+
+              console.log(`[Router] Using local fallback for memory ${memoryId}`);
             }
           }
         }
+
+        // Log processing summary
+        const n8nSuccessCount = processingResults.filter(r => r.n8nSuccess).length;
+        const fallbackCount = processingResults.filter(r => r.usedFallback).length;
+
+        console.log(`[Router] Memory creation summary:`, {
+          total: input.formats.length,
+          n8nSuccess: n8nSuccessCount,
+          fallback: fallbackCount,
+          userId: ctx.user.id,
+        });
 
         // Create notification
         const { createNotification } = await import("./db");
@@ -300,11 +314,17 @@ export const appRouter = router({
           userId: ctx.user.id,
           type: "memory_completed",
           title: "Memória em processamento",
-          message: "Sua memória está sendo criada. Você será notificado quando estiver pronta!",
+          message: `${input.formats.length === 1 ? 'Sua memória está' : `Suas ${input.formats.length} memórias estão`} sendo criada${input.formats.length === 1 ? '' : 's'}. Você será notificado quando estiver${input.formats.length === 1 ? '' : 'em'} pronta${input.formats.length === 1 ? '' : 's'}!`,
           isRead: false,
         });
 
-        return { success: true, count: input.formats.length, creditsRemaining: user.creditsRemaining - creditsNeeded };
+        return {
+          success: true,
+          count: input.formats.length,
+          creditsRemaining: user.creditsRemaining - creditsNeeded,
+          n8nSuccess: n8nSuccessCount,
+          fallbackUsed: fallbackCount,
+        };
       }),
 
     getById: protectedProcedure
@@ -333,11 +353,52 @@ export const appRouter = router({
       const { memories } = await import("../drizzle/schema");
       const { eq, desc } = await import("drizzle-orm");
 
-      return db.select()
+      const userMemories = await db.select()
         .from(memories)
         .where(eq(memories.userId, ctx.user.id))
         .orderBy(desc(memories.createdAt));
+
+      return userMemories;
     }),
+
+    // Endpoint for n8n workflows to update memory status
+    updateStatus: publicProcedure
+      .input(z.object({
+        memoryId: z.number(),
+        status: z.enum(["processing", "completed", "failed"]),
+        videoUrl: z.string().optional(),
+        musicUrl: z.string().optional(),
+        bookUrl: z.string().optional(),
+        podcastUrl: z.string().optional(),
+        thumbnailUrl: z.string().optional(),
+        error: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { getDb } = await import("./db");
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const { memories } = await import("../drizzle/schema");
+        const { eq } = await import("drizzle-orm");
+
+        console.log(`[updateStatus] Updating memory ${input.memoryId} to status: ${input.status}`);
+
+        await db.update(memories)
+          .set({
+            status: input.status,
+            videoUrl: input.videoUrl,
+            musicUrl: input.musicUrl,
+            bookUrl: input.bookUrl,
+            podcastUrl: input.podcastUrl,
+            thumbnailUrl: input.thumbnailUrl,
+            updatedAt: new Date(),
+          })
+          .where(eq(memories.id, input.memoryId));
+
+        console.log(`[updateStatus] Memory ${input.memoryId} updated successfully`);
+
+        return { success: true };
+      }),
   }),
 
   notifications: router({
@@ -394,18 +455,61 @@ export const appRouter = router({
         return { success: true };
       }),
 
-    // Advanced notification endpoints
-    createCustom: protectedProcedure
+    // Endpoint for n8n workflows to create custom notifications
+    createCustom: publicProcedure
       .input(z.object({
-        type: z.enum(["memory_completed", "memory_failed", "new_like", "new_comment", "payment_success", "payment_failed", "system", "welcome", "milestone", "promotion"]),
-        context: z.record(z.string(), z.any()).optional(),
+        userId: z.number(),
+        type: z.string(),
+        context: z.any().optional(),
       }))
-      .mutation(async ({ ctx, input }) => {
-        const { createNotificationFromTemplate } = await import("./notificationTemplates");
+      .mutation(async ({ input }) => {
         const { createNotification } = await import("./db");
 
-        const notification = createNotificationFromTemplate(input.type, ctx.user.id, input.context || {});
-        await createNotification(notification);
+        // Map notification types to templates
+        const templates: Record<string, any> = {
+          memory_completed: {
+            title: "Memória Pronta!",
+            message: `Sua memória "${input.context?.memoryTitle || 'sem título'}" está pronta!`,
+            link: `/my-memories/${input.context?.memoryId}`,
+            imageUrl: input.context?.thumbnailUrl,
+            actionUrl: `/my-memories/${input.context?.memoryId}`,
+            actionLabel: "Ver Memória",
+            priority: "high",
+          },
+          memory_failed: {
+            title: "Erro no Processamento",
+            message: "Houve um erro ao processar sua memória. Seus créditos foram devolvidos.",
+            link: "/dashboard",
+            priority: "high",
+          },
+          payment_success: {
+            title: "Pagamento Confirmado!",
+            message: `Bem-vindo ao plano ${input.context?.plan || 'Premium'}!`,
+            link: "/dashboard",
+            priority: "high",
+          },
+          subscription_cancelled: {
+            title: "Assinatura Cancelada",
+            message: "Sua assinatura foi cancelada. Você pode reativar a qualquer momento.",
+            link: "/pricing",
+            priority: "normal",
+          },
+        };
+
+        const template = templates[input.type] || {
+          title: "Notificação",
+          message: input.context?.message || "Você tem uma nova notificação",
+          link: "/",
+          priority: "normal",
+        };
+
+        await createNotification({
+          userId: input.userId,
+          type: input.type,
+          ...template,
+        });
+
+        console.log(`[createCustom] Notification created for user ${input.userId}, type: ${input.type}`);
 
         return { success: true };
       }),
