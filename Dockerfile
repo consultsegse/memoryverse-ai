@@ -44,6 +44,7 @@ ENV PATH="/opt/venv/bin:$PATH"
 
 # Install PyTorch CPU (lighter, no GPU needed)
 RUN pip3 install --no-cache-dir \
+    "numpy<2" \
     torch torchvision torchaudio \
     --index-url https://download.pytorch.org/whl/cpu
 
